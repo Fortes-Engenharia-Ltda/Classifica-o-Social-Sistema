@@ -1,0 +1,48 @@
+[
+  {
+    "id": 1,
+    "instituicaoIdReferencia": -1000001,
+    "instituicaoIdOrigem": null,
+    "numeroContrato": "T.005/F/26",
+    "descricao": "TESTE",
+    "dataInicio": "2026-05-14",
+    "dataFim": "2028-05-10",
+    "termoAnexo": "/uploads/instituicoes-contratos/1780319120573-ILPI_PLACASSOLARES_MS_compressed_-_assinado__1_.pdf",
+    "obraIds": [
+      1
+    ],
+    "dataCriacao": "2026-06-01T12:56:40.376Z",
+    "dataAtualizacao": "2026-06-01T13:05:20.625Z"
+  },
+  {
+    "id": 2,
+    "instituicaoIdReferencia": -1000001,
+    "instituicaoIdOrigem": null,
+    "numeroContrato": "T.003/F/26",
+    "descricao": "TESTE",
+    "dataInicio": "2026-03-01",
+    "dataFim": "2027-12-01",
+    "termoAnexo": "/uploads/instituicoes-contratos/1780319599714-ILPI_PLACASSOLARES_MS_compressed_-_assinado__1_.pdf",
+    "obraIds": [
+      1
+    ],
+    "dataCriacao": "2026-06-01T13:13:19.735Z",
+    "dataAtualizacao": "2026-06-01T13:19:05.333Z"
+  },
+  {
+    "id": 3,
+    "instituicaoIdReferencia": 1,
+    "instituicaoIdOrigem": 1,
+    "numeroContrato": "T-0-293U48",
+    "descricao": "TESTE",
+    "dataInicio": "2026-01-01",
+    "dataFim": "2026-12-31",
+    "termoAnexo": "/uploads/instituicoes-contratos/1780511292644-ILPI_PLACASSOLARES_MS_compressed_-_assinado__1_.pdf",
+    "obraIds": [
+      1094,
+      1092
+    ],
+    "dataCriacao": "2026-06-03T18:28:12.686Z",
+    "dataAtualizacao": "2026-06-03T18:28:12.686Z"
+  }
+]

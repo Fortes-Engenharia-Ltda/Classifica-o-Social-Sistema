@@ -1,0 +1,41 @@
+[
+  {
+    "id": 103,
+    "nome": "Luiz Gustavo Lacerda Venancio",
+    "email": "luiz.lacerda@fortes.ind.br",
+    "dataNascimento": "2001-08-13",
+    "senha": "$2a$10$ay5LQLbzcAqETWSsTlEJKeRDq9Tw3yhJcuZQZ/7hBSq2djApyEHi6",
+    "perfil": "MASTER",
+    "status": true,
+    "dataCriacao": "2026-05-27T17:27:46.669Z",
+    "dataAtualizacao": "2026-06-01T18:33:37.277Z",
+    "codigoResetSenha": null,
+    "expiraResetSenha": null
+  },
+  {
+    "id": 104,
+    "nome": "Paulo Sousa Sanches Lopes",
+    "email": "paulo.lopes@fortes.ind.br",
+    "dataNascimento": "2005-05-17",
+    "senha": "$2a$10$TlxCe72zs6/tz2KAvdqNF.I5sJqb27Rnemo/Bt9Crxkl8zjwjgCm.",
+    "perfil": "ADMIN",
+    "status": true,
+    "dataCriacao": "2026-05-28T16:46:38.803Z",
+    "dataAtualizacao": "2026-05-28T16:46:38.803Z",
+    "codigoResetSenha": null,
+    "expiraResetSenha": null
+  },
+  {
+    "id": 101,
+    "nome": "Administrador",
+    "email": "admin@classificacao.com",
+    "dataNascimento": null,
+    "senha": "$2a$10$6md5O0pseU1f83TjDlTIYO0stZqytSGQzH2nVsT5YuhI52Qk7gEKK",
+    "perfil": "ADMIN",
+    "status": true,
+    "dataCriacao": "2026-06-01T11:44:16.734Z",
+    "dataAtualizacao": "2026-06-01T14:40:20.437Z",
+    "codigoResetSenha": null,
+    "expiraResetSenha": null
+  }
+]
