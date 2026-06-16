@@ -2307,7 +2307,7 @@ export const Instituicoes: React.FC = () => {
                     checked={cadastroMultiploContratos}
                     onChange={(e) => setCadastroMultiploContratos(e.target.checked)}
                   />
-                  Cadastro múltiplo: após salvar, manter datas e obras para incluir vários contratos.
+                  Cadastro múltiplo: após salvar, manter datas e obras para incluir vários termos.
                 </label>
               ) : null}
               <div className="mt-3 flex justify-end gap-2">
@@ -2330,15 +2330,15 @@ export const Instituicoes: React.FC = () => {
             </div>
 
             <div className="rounded-xl border border-slate-200 p-4 dark:border-slate-700">
-              <h4 className="mb-3 text-sm font-semibold text-slate-900 dark:text-white">Contratos cadastrados</h4>
+              <h4 className="mb-3 text-sm font-semibold text-slate-900 dark:text-white">Termos cadastrados</h4>
               {loadingContratos ? (
-                <p className="text-sm text-slate-500">Carregando contratos...</p>
+                <p className="text-sm text-slate-500">Carregando Termos...</p>
               ) : contratosInstituicao.length === 0 ? (
-                <p className="text-sm text-slate-500">Nenhum contrato cadastrado para esta instituição.</p>
+                <p className="text-sm text-slate-500">Nenhum termo cadastrado para esta instituição.</p>
               ) : (
                 <div className="space-y-5">
                   <div>
-                    <h5 className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Contratos ativos</h5>
+                    <h5 className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Termos ativos</h5>
                     <div className="space-y-3">
                       {contratosInstituicao
                         .filter((contrato) => (contrato.statusAtividade ? contrato.statusAtividade === 'ATIVO' : isContratoAtivo(contrato)))
@@ -2347,9 +2347,9 @@ export const Instituicoes: React.FC = () => {
                   </div>
 
                   <div>
-                    <h5 className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Histórico de contratos inativos</h5>
+                    <h5 className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Histórico de termos inativos</h5>
                     {contratosInstituicao.filter((contrato) => (contrato.statusAtividade ? contrato.statusAtividade === 'INATIVO' : !isContratoAtivo(contrato))).length === 0 ? (
-                      <p className="text-sm text-slate-500">Nenhum contrato inativo no histórico.</p>
+                      <p className="text-sm text-slate-500">Nenhum termo inativo no histórico.</p>
                     ) : (
                       <div className="space-y-3">
                         {contratosInstituicao
