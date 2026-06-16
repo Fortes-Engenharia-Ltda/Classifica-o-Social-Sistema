@@ -4,7 +4,7 @@ import { Programas } from '@/pages/Programas';
 import { Classificacoes } from '@/pages/Classificacoes';
 import { Obras } from '@/pages/Obras';
 
-type Aba = 'orcado-nao-orcado' | 'classificacao-contas' | 'classificacao' | 'programas-sociais' | 'obras';
+type Aba = 'orcado-nao-orcado' | 'classificacao-contas' | 'classificacao' | 'programas-sociais' | 'obras' | 'publicos-alvo';
 
 interface Registro {
   id: number;
@@ -34,6 +34,7 @@ const labels: Record<Aba, string> = {
   classificacao: 'Classificação',
   'programas-sociais': 'Programas Sociais',
   obras: 'Obras',
+  'publicos-alvo': 'Públicos Alvo',
 };
 
 type SortKey = 'id' | 'nome' | 'status';
@@ -76,7 +77,7 @@ export const AdminCadastros: React.FC = () => {
   } | null>(null);
 
   const carregar = async () => {
-    if (abaAtiva !== 'orcado-nao-orcado' && abaAtiva !== 'classificacao-contas') {
+    if (abaAtiva !== 'orcado-nao-orcado' && abaAtiva !== 'classificacao-contas' && abaAtiva !== 'publicos-alvo') {
       setItens([]);
       setContas([]);
       return;
@@ -85,6 +86,12 @@ export const AdminCadastros: React.FC = () => {
     try {
       if (abaAtiva === 'orcado-nao-orcado') {
         const response = await api.get('/admin-cadastros/orcado-nao-orcado');
+        const data = Array.isArray(response.data) ? response.data : response.data?.data ?? [];
+        setItens(data);
+      }
+
+      if (abaAtiva === 'publicos-alvo') {
+        const response = await api.get('/admin-cadastros/publicos-alvo');
         const data = Array.isArray(response.data) ? response.data : response.data?.data ?? [];
         setItens(data);
       }
@@ -243,7 +250,7 @@ export const AdminCadastros: React.FC = () => {
 
   const criar = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (abaAtiva !== 'orcado-nao-orcado') {
+    if (abaAtiva !== 'orcado-nao-orcado' && abaAtiva !== 'publicos-alvo') {
       return;
     }
 
@@ -539,7 +546,7 @@ export const AdminCadastros: React.FC = () => {
         </>
       ) : null}
 
-      {abaAtiva !== 'orcado-nao-orcado' ? null : (
+      {abaAtiva !== 'orcado-nao-orcado' && abaAtiva !== 'publicos-alvo' ? null : (
         <>
           <div className="mb-4">
             <input
@@ -561,14 +568,18 @@ export const AdminCadastros: React.FC = () => {
               }}
               className="px-4 py-2 rounded-lg bg-primary-600 text-white hover:bg-primary-700"
             >
-              Novo Orçado/Não Orçado
+              {abaAtiva === 'publicos-alvo' ? 'Novo Público Alvo' : 'Novo Orçado/Não Orçado'}
             </button>
           </div>
 
           {showNovoOrcadoModal && (
             <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
               <div className="w-full max-w-md rounded-lg bg-white dark:bg-gray-800 p-6">
-                <h2 className="text-xl font-bold mb-4">{editId ? 'Editar Orçado/Não Orçado' : 'Novo Orçado/Não Orçado'}</h2>
+                <h2 className="text-xl font-bold mb-4">
+                  {abaAtiva === 'publicos-alvo'
+                    ? (editId ? 'Editar Público Alvo' : 'Novo Público Alvo')
+                    : (editId ? 'Editar Orçado/Não Orçado' : 'Novo Orçado/Não Orçado')}
+                </h2>
                 <form onSubmit={criar} className="space-y-3">
                   {erroCadastro && (
                     <div className="rounded-lg border border-red-300 bg-red-50 text-red-700 px-3 py-2 text-sm">

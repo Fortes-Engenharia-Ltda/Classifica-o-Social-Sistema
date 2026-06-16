@@ -4,6 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import { ProjetoService } from '@/services';
 import { InstituicaoService } from '@/services/InstituicaoService';
 import { Projeto, ImpactoMensalProjeto, ParticipanteProjeto } from '@/types';
+import api from '@/services/api';
 
 interface DistribuicaoItem {
   competencia: string;
@@ -113,6 +114,8 @@ export const Projetos: React.FC = () => {
   const [showImageLightbox, setShowImageLightbox] = useState(false);
   const [showDistribuicaoModal, setShowDistribuicaoModal] = useState(false);
   const [selectedProjeto, setSelectedProjeto] = useState<Projeto | null>(null);
+  const [instituicoesPorProjeto, setInstituicoesPorProjeto] = useState<any[]>([]);
+  const [publicosAlvo, setPublicosAlvo] = useState<Array<{ id: number; nome: string }>>([]);
   const [deletingProjetoId, setDeletingProjetoId] = useState<number | null>(null);
   const [sortBy, setSortBy] = useState<ProjetoTableSortKey>('nome');
   const [sortOrder, setSortOrder] = useState<SortOrder>('asc');
@@ -237,6 +240,10 @@ export const Projetos: React.FC = () => {
   const handleView = (projeto: Projeto) => {
     setSelectedProjeto(projeto);
     setShowViewModal(true);
+    ProjetoService.listarInstituicoesPorProjeto(projeto.id).then((res) => {
+      const data = Array.isArray(res) ? res : res?.data ?? [];
+      setInstituicoesPorProjeto(data);
+    }).catch(() => setInstituicoesPorProjeto([]));
   };
 
   const imagemProjetoSelecionado = selectedProjeto?.imagem
@@ -281,6 +288,13 @@ export const Projetos: React.FC = () => {
   useEffect(() => {
     localStorage.setItem('projetos:tabela:columnWidths', JSON.stringify(columnWidths));
   }, [columnWidths]);
+
+  useEffect(() => {
+    api.get('/admin-cadastros/publicos-alvo').then((res) => {
+      const data = Array.isArray(res.data) ? res.data : res.data?.data ?? [];
+      setPublicosAlvo(data.filter((item: any) => item.status));
+    }).catch(() => {});
+  }, []);
 
   const compareValues = (a: string | number, b: string | number, order: SortOrder): number => {
     const direction = order === 'asc' ? 1 : -1;
@@ -692,13 +706,16 @@ export const Projetos: React.FC = () => {
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                   Público Alvo
                 </label>
-                <input
-                  type="text"
+                <select
                   value={formData.publicoAlvo}
                   onChange={(e) => setFormData({ ...formData, publicoAlvo: e.target.value })}
                   className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white"
-                  placeholder="Ex: Jovens em vulnerabilidade social"
-                />
+                >
+                  <option value="">Selecione...</option>
+                  {publicosAlvo.map((pa) => (
+                    <option key={pa.id} value={pa.nome}>{pa.nome}</option>
+                  ))}
+                </select>
               </div>
 
               <div>
@@ -1184,6 +1201,36 @@ export const Projetos: React.FC = () => {
               <p className="text-sm text-gray-700 dark:text-gray-300 mt-1">
                 <strong>Instituição:</strong> {selectedProjeto.instituicaoNome || 'Sem instituição vinculada'}
               </p>
+            </div>
+
+            <div className="rounded-lg border border-gray-200 dark:border-gray-700 p-4 mb-4">
+              <p className="text-sm font-semibold text-gray-800 dark:text-gray-200 mb-2">Instituições que nos atendem neste projeto</p>
+              {instituicoesPorProjeto.length > 0 ? (
+                <div className="space-y-2">
+                  {instituicoesPorProjeto.map((inst) => (
+                    <div
+                      key={inst.instituicaoId}
+                      className="rounded-md bg-gray-50 dark:bg-gray-700/40 p-3 flex items-center justify-between"
+                    >
+                      <div>
+                        <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                          {inst.nomeInstituicao}
+                        </p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400">
+                          {inst.quantidadeContratos} termo(s) vinculado(s)
+                        </p>
+                      </div>
+                      <span className={`text-xs font-medium px-2 py-1 rounded-full ${inst.contratoAtivo
+                        ? 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300'
+                        : 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/40 dark:text-yellow-300'}`}>
+                        {inst.contratoAtivo ? 'Com contrato ativo' : 'Sem contrato ativo'}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-sm text-gray-600 dark:text-gray-300">Nenhuma instituição vinculada a este projeto via termo de contrato.</p>
+              )}
             </div>
 
             <div className="rounded-lg border border-gray-200 dark:border-gray-700 p-4 mb-4">

@@ -1751,18 +1751,26 @@ export const NotasFiscais: React.FC = () => {
                     </option>
                   ))}
                 </select>
-                <select
-                  value={classificacaoForm.projeto}
-                  onChange={(e) => setClassificacaoForm({ ...classificacaoForm, projeto: e.target.value })}
-                  className="rounded-lg border border-slate-300 px-3 py-2"
-                >
-                  <option value="">Projeto *</option>
-                  {nomesProjetosAtivos.map((nome) => (
-                    <option key={nome} value={nome}>
-                      {nome}
-                    </option>
-                  ))}
-                </select>
+                <div className="flex flex-col gap-1">
+                  <select
+                    value={classificacaoForm.projeto}
+                    onChange={(e) => setClassificacaoForm({ ...classificacaoForm, projeto: e.target.value })}
+                    className="rounded-lg border border-slate-300 px-3 py-2"
+                  >
+                    <option value="">Projeto *</option>
+                    {nomesProjetosAtivos.map((nome) => (
+                      <option key={nome} value={nome}>
+                        {nome}
+                      </option>
+                    ))}
+                  </select>
+                  {classificacaoForm.projeto && (() => {
+                    const proj = projetosAtivos.find((p: any) => p.nome === classificacaoForm.projeto);
+                    return proj?.publicoAlvo
+                      ? <span className="text-xs text-slate-500 dark:text-slate-400">Público-alvo: {proj.publicoAlvo}</span>
+                      : null;
+                  })()}
+                </div>
                 <select
                   value={classificacaoForm.classificacaoProjetoAtt}
                   onChange={(e) =>
@@ -2015,20 +2023,36 @@ export const NotasFiscais: React.FC = () => {
                   </td>
                   <td className="px-3 py-3">
                     {inlineEditMode ? (
-                      <select
-                        value={getInlineFieldsForRow(nf).projeto}
-                        onChange={(e) => updateInlineFieldForRow(nf, 'projeto', e.target.value)}
-                        className="nf-inline-select w-44 rounded border border-slate-300 px-2 py-1 text-xs dark:border-slate-600 dark:bg-slate-700"
-                      >
-                        <option value="">Selecione</option>
-                        {nomesProjetosAtivos.map((nome) => (
-                          <option key={nome} value={nome}>
-                            {nome}
-                          </option>
-                        ))}
-                      </select>
+                      <div className="flex flex-col gap-1">
+                        <select
+                          value={getInlineFieldsForRow(nf).projeto}
+                          onChange={(e) => updateInlineFieldForRow(nf, 'projeto', e.target.value)}
+                          className="nf-inline-select w-44 rounded border border-slate-300 px-2 py-1 text-xs dark:border-slate-600 dark:bg-slate-700"
+                        >
+                          <option value="">Selecione</option>
+                          {nomesProjetosAtivos.map((nome) => (
+                            <option key={nome} value={nome}>
+                              {nome}
+                            </option>
+                          ))}
+                        </select>
+                        {(() => {
+                          const proj = projetosAtivos.find((p: any) => p.nome === getInlineFieldsForRow(nf).projeto);
+                          return proj?.publicoAlvo
+                            ? <span className="text-xs text-slate-400">PA: {proj.publicoAlvo}</span>
+                            : null;
+                        })()}
+                      </div>
                     ) : (
-                      nf.camposClassificacao?.projeto || '-'
+                      <div className="flex flex-col">
+                        <span>{nf.camposClassificacao?.projeto || '-'}</span>
+                        {(() => {
+                          const proj = projetosAtivos.find((p: any) => p.nome === nf.camposClassificacao?.projeto);
+                          return proj?.publicoAlvo
+                            ? <span className="text-xs text-slate-400">PA: {proj.publicoAlvo}</span>
+                            : null;
+                        })()}
+                      </div>
                     )}
                   </td>
                   <td className="px-3 py-3">

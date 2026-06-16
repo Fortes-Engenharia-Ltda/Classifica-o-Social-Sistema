@@ -294,6 +294,20 @@ model InstituicaoSocial {
   @@index([dataRevisao])
 }
 
+model PublicoAlvo {
+  id                Int                @id @default(autoincrement())
+  nome              String             @db.VarChar(200)
+  status            Boolean            @default(true)
+  dataCriacao       DateTime           @default(now()) @map("data_criacao")
+  dataAtualizacao   DateTime           @updatedAt @map("data_atualizacao")
+
+  // Relacionamentos
+  instituicoes      InstituicaoSocial[]
+
+  @@map("publicos_alvo")
+  @@index([status])
+}
+
 model ResponsavelInstituicao {
   id              Int                 @id @default(autoincrement())
   instituicaoId   Int?                @map("instituicao_id")

@@ -1342,6 +1342,12 @@ export class InstituicaoController {
       const descricao = String(bodyComPayload?.descricao || '').trim();
       const dataInicio = String(bodyComPayload?.dataInicio || '').trim();
       const dataFim = String(bodyComPayload?.dataFim || '').trim();
+      const publicoAlvoId = bodyComPayload?.publicoAlvoId
+        ? Number(bodyComPayload.publicoAlvoId)
+        : null;
+      const projetoId = bodyComPayload?.projetoId
+        ? Number(bodyComPayload.projetoId)
+        : null;
 
       const obraIdsBruto = Array.isArray(bodyComPayload?.obraIds)
         ? bodyComPayload.obraIds
@@ -1413,6 +1419,8 @@ export class InstituicaoController {
         dataFim,
         termoAnexo,
         obraIds,
+        publicoAlvoId,
+        projetoId,
         dataCriacao: new Date().toISOString(),
         dataAtualizacao: new Date().toISOString(),
       };
@@ -1494,6 +1502,12 @@ export class InstituicaoController {
       const descricao = String(bodyComPayload?.descricao || '').trim();
       const dataInicio = String(bodyComPayload?.dataInicio || '').trim();
       const dataFim = String(bodyComPayload?.dataFim || '').trim();
+      const publicoAlvoId = bodyComPayload?.publicoAlvoId
+        ? Number(bodyComPayload.publicoAlvoId)
+        : null;
+      const projetoId = bodyComPayload?.projetoId
+        ? Number(bodyComPayload.projetoId)
+        : null;
 
       const obraIdsBruto = Array.isArray(bodyComPayload?.obraIds)
         ? bodyComPayload.obraIds
@@ -1552,6 +1566,8 @@ export class InstituicaoController {
         dataFim,
         termoAnexo,
         obraIds,
+        publicoAlvoId,
+        projetoId,
         dataAtualizacao: new Date().toISOString(),
       };
 

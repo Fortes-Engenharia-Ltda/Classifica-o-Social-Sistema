@@ -154,6 +154,7 @@ interface ContratoInstituicao {
   dataFim: string;
   termoAnexo?: string | null;
   obraIds: number[];
+  publicoAlvoId?: number | null;
   statusAtividade?: 'ATIVO' | 'INATIVO';
   obrasAtendidas?: Array<{ id: number; nome?: string; codigo?: string }>;
 }
@@ -470,6 +471,9 @@ export const Instituicoes: React.FC = () => {
     startWidth: number;
     minWidth: number;
   } | null>(null);
+  const [publicosAlvo, setPublicosAlvo] = useState<Array<{ id: number; nome: string }>>([]);
+  const [projetos, setProjetos] = useState<Array<{ id: number; nome: string; publicoAlvo?: string | null }>>([]);
+
   const [novoContrato, setNovoContrato] = useState({
     id: null as number | null,
     numeroContrato: '',
@@ -479,6 +483,8 @@ export const Instituicoes: React.FC = () => {
     obraIds: [] as number[],
     contratoFile: null as File | null,
     termoAnexo: '' as string,
+    publicoAlvoId: '' as string | number,
+    projetoId: '' as string | number,
   });
 
   const abrirModalDetalhes = (item: InstituicaoParaRevisao) => {
@@ -530,6 +536,8 @@ export const Instituicoes: React.FC = () => {
       obraIds: [],
       contratoFile: null,
       termoAnexo: '',
+      publicoAlvoId: '',
+      projetoId: '',
     });
     setCadastroMultiploContratos(false);
 
@@ -571,6 +579,8 @@ export const Instituicoes: React.FC = () => {
       obraIds: Array.isArray(contrato.obraIds) ? [...contrato.obraIds] : [],
       contratoFile: null,
       termoAnexo: contrato.termoAnexo || '',
+      publicoAlvoId: (contrato as any).publicoAlvoId ?? '',
+      projetoId: (contrato as any).projetoId ?? '',
     });
   };
 
@@ -584,6 +594,8 @@ export const Instituicoes: React.FC = () => {
       obraIds: [],
       contratoFile: null,
       termoAnexo: '',
+      publicoAlvoId: '',
+      projetoId: '',
     });
   };
 
@@ -619,6 +631,8 @@ export const Instituicoes: React.FC = () => {
         dataFim: novoContrato.dataFim,
         obraIds: novoContrato.obraIds,
         termoAnexo: novoContrato.termoAnexo || undefined,
+        publicoAlvoId: novoContrato.publicoAlvoId || null,
+        projetoId: novoContrato.projetoId || null,
       }));
 
       if (novoContrato.contratoFile) {
@@ -649,6 +663,8 @@ export const Instituicoes: React.FC = () => {
           descricao: '',
           contratoFile: null,
           termoAnexo: '',
+          publicoAlvoId: '',
+          projetoId: '',
         }));
       }
 
@@ -680,6 +696,12 @@ export const Instituicoes: React.FC = () => {
       <p className="text-slate-700 dark:text-slate-200 mb-1">{contrato.descricao}</p>
       <p className="text-slate-600 dark:text-slate-300 mb-1">
         Vigência: {formatarDataLocalPtBr(contrato.dataInicio)} até {formatarDataLocalPtBr(contrato.dataFim)}
+      </p>
+      <p className="text-slate-600 dark:text-slate-300 mb-1">
+        Público-alvo: {publicosAlvo.find((pa) => pa.id === contrato.publicoAlvoId)?.nome || '-'}
+      </p>
+      <p className="text-slate-600 dark:text-slate-300 mb-1">
+        Projeto: {projetos.find((p) => p.id === (contrato as any).projetoId)?.nome || '-'}
       </p>
       <p className="text-slate-600 dark:text-slate-300 mb-2">
         Obras: {(contrato.obrasAtendidas && contrato.obrasAtendidas.length > 0)
@@ -1125,6 +1147,17 @@ export const Instituicoes: React.FC = () => {
   useEffect(() => {
     localStorage.setItem('instituicoes:columnWidths', JSON.stringify(tableColumnWidths));
   }, [tableColumnWidths]);
+
+  useEffect(() => {
+    api.get('/admin-cadastros/publicos-alvo').then((res) => {
+      const data = Array.isArray(res.data) ? res.data : res.data?.data ?? [];
+      setPublicosAlvo(data.filter((item: any) => item.status));
+    }).catch(() => {});
+    api.get('/projetos?pageSize=999').then((res) => {
+      const data = res.data?.data ?? res.data ?? [];
+      setProjetos(Array.isArray(data) ? data : []);
+    }).catch(() => {});
+  }, []);
 
   const getColumnWidth = (table: TableWidthKey, key: string): string | undefined => {
     const width = tableColumnWidths[table]?.[key];
@@ -2277,6 +2310,34 @@ export const Instituicoes: React.FC = () => {
                     rows={3}
                     className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-800"
                   />
+                </label>
+                <label className="space-y-1">
+                  <span className="block text-xs font-medium text-slate-600 dark:text-slate-300">Público-alvo</span>
+                  <div className="w-full rounded-lg border border-slate-200 dark:border-slate-700 px-3 py-2 text-sm text-slate-600 dark:text-slate-400 bg-slate-50 dark:bg-slate-800/50">
+                    {publicosAlvo.find((pa) => String(pa.id) === String(novoContrato.publicoAlvoId))?.nome || '-'}
+                  </div>
+                </label>
+                <label className="space-y-1">
+                  <span className="block text-xs font-medium text-slate-600 dark:text-slate-300">Projeto que atende</span>
+                  <select
+                    value={novoContrato.projetoId}
+                    onChange={(e) => {
+                      const projetoId = e.target.value;
+                      const projeto = projetos.find((p) => String(p.id) === String(projetoId));
+                      let paId = '';
+                      if (projeto && projeto.publicoAlvo) {
+                        const pa = publicosAlvo.find((pa) => pa.nome === projeto.publicoAlvo);
+                        if (pa) paId = String(pa.id);
+                      }
+                      setNovoContrato((prev) => ({ ...prev, projetoId, publicoAlvoId: paId }));
+                    }}
+                    className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-800"
+                  >
+                    <option value="">Selecione...</option>
+                    {projetos.map((p) => (
+                      <option key={p.id} value={p.id}>{p.nome}</option>
+                    ))}
+                  </select>
                 </label>
                 <div className="md:col-span-2 space-y-2">
                   <span className="block text-xs font-medium text-slate-600 dark:text-slate-300">Obra(s) atendida(s)</span>

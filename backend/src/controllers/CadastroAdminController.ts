@@ -419,4 +419,118 @@ export class CadastroAdminController {
   async criarPrograma(req: Request, res: Response) {
     res.status(201).json({});
   }
+
+  // Públicos Alvo
+  async listarPublicosAlvo(req: Request, res: Response) {
+    try {
+      const itens = await prisma.publicoAlvo.findMany({
+        orderBy: [{ status: 'desc' }, { nome: 'asc' }],
+      });
+
+      res.json(itens);
+    } catch (error) {
+      logger.error(
+        `Erro ao listar Públicos Alvo: ${
+          error instanceof Error ? error.stack || error.message : JSON.stringify(error)
+        }`,
+      );
+      res.status(500).json({ message: 'Erro ao listar Públicos Alvo' });
+    }
+  }
+
+  async criarPublicoAlvo(req: Request, res: Response) {
+    try {
+      const nome = String(req.body?.nome || '').trim();
+      const statusRaw = req.body?.status;
+
+      if (!nome) {
+        res.status(400).json({ message: 'Nome é obrigatório' });
+        return;
+      }
+
+      const status = typeof statusRaw === 'boolean' ? statusRaw : true;
+
+      const duplicado = await prisma.publicoAlvo.findFirst({
+        where: { nome: { equals: nome, mode: 'insensitive' } },
+      });
+      if (duplicado) {
+        res.status(409).json({ message: 'Já existe um público alvo com esse nome' });
+        return;
+      }
+
+      const novoItem = await prisma.publicoAlvo.create({
+        data: { nome, status },
+      });
+
+      res.status(201).json(novoItem);
+    } catch (error) {
+      logger.error(
+        `Erro ao criar Público Alvo: ${
+          error instanceof Error ? error.stack || error.message : JSON.stringify(error)
+        }`,
+      );
+      res.status(500).json({ message: 'Erro ao criar Público Alvo' });
+    }
+  }
+
+  async atualizarPublicoAlvo(req: Request, res: Response) {
+    try {
+      const id = Number(req.params.id);
+      if (!Number.isFinite(id) || id <= 0) {
+        res.status(400).json({ message: 'ID inválido' });
+        return;
+      }
+
+      const nomeRecebido = req.body?.nome;
+      const statusRecebido = req.body?.status;
+      const nome = typeof nomeRecebido === 'string' ? nomeRecebido.trim() : undefined;
+      const status = typeof statusRecebido === 'boolean' ? statusRecebido : undefined;
+
+      if (nome === undefined && status === undefined) {
+        res.status(400).json({ message: 'Informe ao menos nome ou status para atualizar' });
+        return;
+      }
+
+      if (nome !== undefined && !nome) {
+        res.status(400).json({ message: 'Nome não pode ser vazio' });
+        return;
+      }
+
+      const existente = await prisma.publicoAlvo.findUnique({ where: { id } });
+      if (!existente) {
+        res.status(404).json({ message: 'Registro não encontrado' });
+        return;
+      }
+
+      if (nome !== undefined) {
+        const duplicado = await prisma.publicoAlvo.findFirst({
+          where: {
+            id: { not: id },
+            nome: { equals: nome, mode: 'insensitive' },
+          },
+        });
+        if (duplicado) {
+          res.status(409).json({ message: 'Já existe um público alvo com esse nome' });
+          return;
+        }
+      }
+
+      const atualizado = await prisma.publicoAlvo.update({
+        where: { id },
+        data: {
+          ...(nome !== undefined ? { nome } : {}),
+          ...(status !== undefined ? { status } : {}),
+        },
+      });
+
+      res.status(200).json(atualizado);
+    } catch (error) {
+      logger.error(
+        `Erro ao atualizar Público Alvo: ${
+          error instanceof Error ? error.stack || error.message : JSON.stringify(error)
+        }`,
+      );
+      res.status(500).json({ message: 'Erro ao atualizar Público Alvo' });
+    }
+  }
 }

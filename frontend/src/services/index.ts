@@ -103,6 +103,11 @@ export class ProjetoService {
     });
     return response.data?.data;
   }
+
+  static async listarInstituicoesPorProjeto(projetoId: number): Promise<any> {
+    const response = await api.get(`/projetos/${projetoId}/instituicoes`);
+    return response.data;
+  }
 }
 
 export class ProgramaService {

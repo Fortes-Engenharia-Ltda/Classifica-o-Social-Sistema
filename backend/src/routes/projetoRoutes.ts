@@ -47,6 +47,7 @@ router.post('/', authorize('ADMIN'), (req, res) => projetoController.create(req,
 router.post('/upload-imagem', authorize('ADMIN'), uploadImagem.single('imagem'), (req, res) => projetoController.uploadImagem(req, res));
 router.get('/', (req, res) => projetoController.findAll(req, res));
 router.get('/:id', (req, res) => projetoController.findById(req, res));
+router.get('/:id/instituicoes', (req, res) => projetoController.listarInstituicoesPorProjeto(req, res));
 router.put('/:id', authorize('ADMIN'), (req, res) => projetoController.update(req, res));
 router.delete('/:id', authorize('ADMIN'), (req, res) => projetoController.delete(req, res));
 

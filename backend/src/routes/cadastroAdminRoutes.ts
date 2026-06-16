@@ -22,4 +22,9 @@ router.put('/classificacao-contas/:id', controller.atualizarClassificacaoConta);
 router.get('/programas-sociais', controller.listarProgramas);
 router.post('/programas-sociais', controller.criarPrograma);
 
+// Públicos Alvo
+router.get('/publicos-alvo', controller.listarPublicosAlvo);
+router.post('/publicos-alvo', controller.criarPublicoAlvo);
+router.put('/publicos-alvo/:id', controller.atualizarPublicoAlvo);
+
 export default router;
