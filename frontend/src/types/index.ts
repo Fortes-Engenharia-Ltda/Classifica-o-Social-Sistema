@@ -113,6 +113,9 @@ export interface NotaFiscal {
     valor?: number | null;
     codDocumento?: string | null;
     observacoes?: string | null;
+    publicoAlvo?: string | null;
+    classe?: string | null;
+    classificacaoConta?: string | null;
   };
   pendenteClassificacao?: boolean;
   dataCriacao: string;

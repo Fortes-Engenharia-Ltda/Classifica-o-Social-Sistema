@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { ProgramaService } from '@/services';
 import { DataTable } from '@/components/DataTable';
 import { Programa } from '@/types';
-import { Plus } from 'lucide-react';
+import { Plus, X } from 'lucide-react';
 
 export const Programas: React.FC = () => {
   const [page, setPage] = useState(1);
@@ -127,7 +127,12 @@ export const Programas: React.FC = () => {
       {showModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-md w-full">
-            <h2 className="text-xl font-bold mb-4">{editId ? 'Editar Programa' : 'Novo Programa'}</h2>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xl font-bold">{editId ? 'Editar Programa' : 'Novo Programa'}</h2>
+              <button type="button" onClick={() => { setShowModal(false); setEditId(null); setErro(''); }} className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300">
+                <X size={20} />
+              </button>
+            </div>
             <form onSubmit={handleCreate} className="space-y-4">
               {erro && (
                 <div className="rounded-lg border border-red-300 bg-red-50 text-red-700 px-3 py-2 text-sm">

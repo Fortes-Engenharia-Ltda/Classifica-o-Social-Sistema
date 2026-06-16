@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { UsuarioService } from '@/services/UsuarioService';
 import { Usuario } from '@/types';
-import { Mail, Pencil, Plus, Search } from 'lucide-react';
+import { Mail, Pencil, Plus, Search, X } from 'lucide-react';
 import { ROLE_LABELS, RolePerfil } from '@/config/moduleVisibility';
 import { useAuthStore } from '@/store/authStore';
 
@@ -240,9 +240,14 @@ export const Usuarios: React.FC = () => {
       {modalTipo && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
           <div className="w-full max-w-xl rounded-2xl bg-white p-6 shadow-2xl dark:bg-slate-900">
-            <h2 className="mb-5 text-xl font-bold text-slate-900 dark:text-white">
-              {modalTipo === 'novo' ? 'Novo usuário' : 'Editar usuário'}
-            </h2>
+            <div className="flex items-center justify-between mb-5">
+              <h2 className="text-xl font-bold text-slate-900 dark:text-white">
+                {modalTipo === 'novo' ? 'Novo usuário' : 'Editar usuário'}
+              </h2>
+              <button type="button" onClick={fecharModal} className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300">
+                <X size={20} />
+              </button>
+            </div>
 
             <form onSubmit={modalTipo === 'novo' ? handleCreate : handleEditar} className="space-y-4">
               <div className="grid gap-3 md:grid-cols-2">

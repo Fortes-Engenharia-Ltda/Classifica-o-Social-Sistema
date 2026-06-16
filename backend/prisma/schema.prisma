@@ -301,9 +301,6 @@ model PublicoAlvo {
   dataCriacao       DateTime           @default(now()) @map("data_criacao")
   dataAtualizacao   DateTime           @updatedAt @map("data_atualizacao")
 
-  // Relacionamentos
-  instituicoes      InstituicaoSocial[]
-
   @@map("publicos_alvo")
   @@index([status])
 }
@@ -355,3 +352,5 @@ model ResponsavelTecnico {
   @@index([instituicaoId])
   @@map("responsaveis_tecnicos")
 }
+
+

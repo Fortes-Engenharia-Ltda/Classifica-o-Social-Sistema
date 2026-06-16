@@ -7,7 +7,6 @@ export interface CreateNotaFiscalDTO {
   dataEmissao: string;
   obraId: number;
   actionCode?: number;
-  classificacaoContaId?: number;
   status?: string;
   origemImportacao?: string;
   observacao?: string;
@@ -23,7 +22,6 @@ export interface UpdateNotaFiscalDTO {
   dataEmissao?: string;
   obraId?: number;
   actionCode?: number;
-  classificacaoContaId?: number;
   status?: string;
   observacao?: string;
   camposClassificacao?: CamposClassificacaoDTO;
@@ -43,6 +41,9 @@ export interface CamposClassificacaoDTO {
   valor?: number | null;
   codDocumento?: string | null;
   observacoes?: string | null;
+  publicoAlvo?: string | null;
+  classe?: string | null;
+  classificacaoConta?: string | null;
 }
 
 // DTO para retornar nota fiscal
@@ -55,7 +56,6 @@ export interface NotaFiscalResponseDTO {
   dataEmissao: Date;
   obraId: number;
   actionCode?: number | null;
-  classificacaoContaId?: number | null;
   periodo?: string;
   localizacao?: string | null;
   status: string;

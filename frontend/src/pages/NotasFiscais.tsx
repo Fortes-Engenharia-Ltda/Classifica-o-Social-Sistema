@@ -4,6 +4,7 @@ import { NotaFiscalService } from '@/services/NotaFiscalService';
 import { InstituicaoService } from '@/services/InstituicaoService';
 import { NotaFiscal } from '@/types';
 import { ClassificacaoService, ObraService, ProgramaService, ProjetoService } from '@/services';
+import api from '@/services/api';
 import { useAuthStore } from '@/store/authStore';
 import { useUIStore } from '@/store/uiStore';
 import { ArrowDown, ArrowUp, ArrowUpDown, CheckSquare, ChevronDown, ChevronUp, Download, FileSpreadsheet, Plus, Save, Square, Trash2, Upload, X } from 'lucide-react';
@@ -75,6 +76,9 @@ type ClassificacaoForm = {
   valor: string;
   codDocumento: string;
   observacoes: string;
+  publicoAlvo: string;
+  classe: string;
+  classificacaoConta: string;
 };
 
 type InlineEditFields = {
@@ -84,6 +88,8 @@ type InlineEditFields = {
   instituicao: string;
   projeto: string;
   classificacaoProjetoAtt: string;
+  classe: string;
+  classificacaoConta: string;
 };
 
 const formatDateLabel = (raw?: string): string => {
@@ -271,6 +277,9 @@ const emptyClassificacaoForm: ClassificacaoForm = {
   valor: '',
   codDocumento: '',
   observacoes: '',
+  publicoAlvo: '',
+  classe: '',
+  classificacaoConta: '',
 };
 
 export const NotasFiscais: React.FC = () => {
@@ -557,6 +566,8 @@ export const NotasFiscais: React.FC = () => {
     instituicao: String(nf.camposClassificacao?.instituicao || '').trim(),
     projeto: String(nf.camposClassificacao?.projeto || '').trim(),
     classificacaoProjetoAtt: String(nf.camposClassificacao?.classificacaoProjetoAtt || '').trim(),
+    classe: String(nf.camposClassificacao?.classe ?? '').trim(),
+    classificacaoConta: String(nf.camposClassificacao?.classificacaoConta ?? '').trim(),
   });
 
   const getInlineFieldsForRow = (nf: NotaFiscal): InlineEditFields => {
@@ -806,6 +817,9 @@ export const NotasFiscais: React.FC = () => {
       valor: base?.valor != null ? String(base.valor) : nota?.valor != null ? String(nota.valor) : '',
       codDocumento: base?.codDocumento || '',
       observacoes: base?.observacoes || nota?.observacao || '',
+      publicoAlvo: base?.publicoAlvo || '',
+      classe: base?.classe || '',
+      classificacaoConta: base?.classificacaoConta || '',
     });
 
     setShowClassificarModal(true);
@@ -827,6 +841,9 @@ export const NotasFiscais: React.FC = () => {
       valor: classificacaoForm.valor ? Number(classificacaoForm.valor) : null,
       codDocumento: classificacaoForm.codDocumento || null,
       observacoes: classificacaoForm.observacoes || null,
+      publicoAlvo: classificacaoForm.publicoAlvo || null,
+      classe: classificacaoForm.classe || null,
+      classificacaoConta: classificacaoForm.classificacaoConta || null,
     };
 
     const camposClassificacaoParciais = Object.fromEntries(
@@ -907,6 +924,8 @@ export const NotasFiscais: React.FC = () => {
         instituicao: rowFields.instituicao,
         projeto: rowFields.projeto,
         classificacaoProjetoAtt: rowFields.classificacaoProjetoAtt,
+        classe: rowFields.classe,
+        classificacaoConta: rowFields.classificacaoConta,
       }).filter(([_, value]) => String(value ?? '').trim().length > 0),
     );
 
@@ -932,6 +951,8 @@ export const NotasFiscais: React.FC = () => {
       || String(base.projeto || '').trim() !== String(rowFields.projeto || '').trim()
       || String(base.classificacaoProjetoAtt || '').trim()
         !== String(rowFields.classificacaoProjetoAtt || '').trim()
+      || String(base.classe ?? '').trim() !== String(rowFields.classe ?? '').trim()
+      || String(base.classificacaoConta ?? '').trim() !== String(rowFields.classificacaoConta ?? '').trim()
     );
   };
 
@@ -1635,7 +1656,12 @@ export const NotasFiscais: React.FC = () => {
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
           <div className="w-full max-w-md rounded-xl bg-white p-6 dark:bg-slate-800">
-            <h2 className="mb-4 text-xl font-bold">Nova Nota Fiscal</h2>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xl font-bold">Nova Nota Fiscal</h2>
+              <button type="button" onClick={() => setShowModal(false)} className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300">
+                <X size={20} />
+              </button>
+            </div>
             <form onSubmit={handleCreate} className="space-y-3">
               <input
                 type="text"
@@ -1709,9 +1735,14 @@ export const NotasFiscais: React.FC = () => {
       {showClassificarModal && (
         <div className="fixed inset-0 z-50 overflow-y-auto bg-black/60 p-4">
           <div className="mx-auto w-full max-w-4xl rounded-xl bg-white p-6 dark:bg-slate-900">
-            <h2 className="mb-4 text-xl font-bold">
-              {classificarEmLote ? `Classificação em lote (${selectedIds.length} NFs)` : `Classificar NF ${notaSelecionada?.numeroNF}`}
-            </h2>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xl font-bold">
+                {classificarEmLote ? `Classificação em lote (${selectedIds.length} NFs)` : `Classificar NF ${notaSelecionada?.numeroNF}`}
+              </h2>
+              <button type="button" onClick={() => setShowClassificarModal(false)} className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300">
+                <X size={20} />
+              </button>
+            </div>
             <form onSubmit={handleSaveClassificacao} className="space-y-4">
               <div className="rounded-lg border border-amber-300 bg-amber-50 p-3 text-sm text-amber-800">
                 Preencha os campos obrigatórios para tirar a NF da pendência no dashboard.
@@ -1754,7 +1785,15 @@ export const NotasFiscais: React.FC = () => {
                 <div className="flex flex-col gap-1">
                   <select
                     value={classificacaoForm.projeto}
-                    onChange={(e) => setClassificacaoForm({ ...classificacaoForm, projeto: e.target.value })}
+                    onChange={(e) => {
+                      const projeto = e.target.value;
+                      const proj = projetosAtivos.find((p: any) => p.nome === projeto);
+                      setClassificacaoForm((prev) => ({
+                        ...prev,
+                        projeto,
+                        publicoAlvo: proj?.publicoAlvo || '',
+                      }));
+                    }}
                     className="rounded-lg border border-slate-300 px-3 py-2"
                   >
                     <option value="">Projeto *</option>
@@ -1764,12 +1803,9 @@ export const NotasFiscais: React.FC = () => {
                       </option>
                     ))}
                   </select>
-                  {classificacaoForm.projeto && (() => {
-                    const proj = projetosAtivos.find((p: any) => p.nome === classificacaoForm.projeto);
-                    return proj?.publicoAlvo
-                      ? <span className="text-xs text-slate-500 dark:text-slate-400">Público-alvo: {proj.publicoAlvo}</span>
-                      : null;
-                  })()}
+                  {classificacaoForm.publicoAlvo && (
+                    <span className="text-xs text-slate-500 dark:text-slate-400">Público-alvo: {classificacaoForm.publicoAlvo}</span>
+                  )}
                 </div>
                 <select
                   value={classificacaoForm.classificacaoProjetoAtt}
@@ -1785,6 +1821,18 @@ export const NotasFiscais: React.FC = () => {
                     </option>
                   ))}
                 </select>
+                <input
+                  value={classificacaoForm.classe}
+                  onChange={(e) => setClassificacaoForm({ ...classificacaoForm, classe: e.target.value })}
+                  placeholder="Classe"
+                  className="rounded-lg border border-slate-300 px-3 py-2"
+                />
+                <input
+                  value={classificacaoForm.classificacaoConta}
+                  onChange={(e) => setClassificacaoForm({ ...classificacaoForm, classificacaoConta: e.target.value })}
+                  placeholder="Classificação Conta"
+                  className="rounded-lg border border-slate-300 px-3 py-2"
+                />
               </div>
 
               <div>
@@ -1925,6 +1973,18 @@ export const NotasFiscais: React.FC = () => {
                   <button type="button" onClick={() => toggleSort('classificacaoProjetoAtt')} className="inline-flex items-center gap-1 pr-2">Classificação ATT {renderSortIcon('classificacaoProjetoAtt')}</button>
                   <button type="button" aria-label="Redimensionar coluna Classificação ATT" onMouseDown={(e) => handleResizeStart(e, 'classificacaoProjetoAtt', 190)} className="absolute right-0 top-0 h-full w-2 cursor-col-resize hover:bg-blue-200/70 dark:hover:bg-blue-700/50" />
                 </th>
+                <th style={{ width: getColumnWidth('publicoAlvo') }} className="relative px-3 py-3 text-left font-semibold">
+                  <button type="button" className="inline-flex items-center gap-1 pr-2">Público Alvo</button>
+                  <button type="button" aria-label="Redimensionar coluna Público Alvo" onMouseDown={(e) => handleResizeStart(e, 'publicoAlvo', 160)} className="absolute right-0 top-0 h-full w-2 cursor-col-resize hover:bg-blue-200/70 dark:hover:bg-blue-700/50" />
+                </th>
+                <th style={{ width: getColumnWidth('classe') }} className="relative px-3 py-3 text-left font-semibold">
+                  <button type="button" className="inline-flex items-center gap-1 pr-2">Classe</button>
+                  <button type="button" aria-label="Redimensionar coluna Classe" onMouseDown={(e) => handleResizeStart(e, 'classe', 140)} className="absolute right-0 top-0 h-full w-2 cursor-col-resize hover:bg-blue-200/70 dark:hover:bg-blue-700/50" />
+                </th>
+                <th style={{ width: getColumnWidth('classificacaoConta') }} className="relative px-3 py-3 text-left font-semibold">
+                  <button type="button" className="inline-flex items-center gap-1 pr-2">Classificação Conta</button>
+                  <button type="button" aria-label="Redimensionar coluna Classificação Conta" onMouseDown={(e) => handleResizeStart(e, 'classificacaoConta', 160)} className="absolute right-0 top-0 h-full w-2 cursor-col-resize hover:bg-blue-200/70 dark:hover:bg-blue-700/50" />
+                </th>
                 <th style={{ width: getColumnWidth('status') }} className="relative px-3 py-3 text-left font-semibold">
                   <button type="button" onClick={() => toggleSort('status')} className="inline-flex items-center gap-1 pr-2">Status {renderSortIcon('status')}</button>
                   <button type="button" aria-label="Redimensionar coluna Status" onMouseDown={(e) => handleResizeStart(e, 'status', 120)} className="absolute right-0 top-0 h-full w-2 cursor-col-resize hover:bg-blue-200/70 dark:hover:bg-blue-700/50" />
@@ -2023,36 +2083,24 @@ export const NotasFiscais: React.FC = () => {
                   </td>
                   <td className="px-3 py-3">
                     {inlineEditMode ? (
-                      <div className="flex flex-col gap-1">
-                        <select
-                          value={getInlineFieldsForRow(nf).projeto}
-                          onChange={(e) => updateInlineFieldForRow(nf, 'projeto', e.target.value)}
-                          className="nf-inline-select w-44 rounded border border-slate-300 px-2 py-1 text-xs dark:border-slate-600 dark:bg-slate-700"
-                        >
-                          <option value="">Selecione</option>
-                          {nomesProjetosAtivos.map((nome) => (
-                            <option key={nome} value={nome}>
-                              {nome}
-                            </option>
-                          ))}
-                        </select>
-                        {(() => {
-                          const proj = projetosAtivos.find((p: any) => p.nome === getInlineFieldsForRow(nf).projeto);
-                          return proj?.publicoAlvo
-                            ? <span className="text-xs text-slate-400">PA: {proj.publicoAlvo}</span>
-                            : null;
-                        })()}
-                      </div>
+                      <select
+                        value={getInlineFieldsForRow(nf).projeto}
+                        onChange={(e) => {
+                          const projeto = e.target.value;
+                          const proj = projetosAtivos.find((p: any) => p.nome === projeto);
+                          updateInlineFieldForRow(nf, 'projeto', projeto);
+                        }}
+                        className="nf-inline-select w-44 rounded border border-slate-300 px-2 py-1 text-xs dark:border-slate-600 dark:bg-slate-700"
+                      >
+                        <option value="">Selecione</option>
+                        {nomesProjetosAtivos.map((nome) => (
+                          <option key={nome} value={nome}>
+                            {nome}
+                          </option>
+                        ))}
+                      </select>
                     ) : (
-                      <div className="flex flex-col">
-                        <span>{nf.camposClassificacao?.projeto || '-'}</span>
-                        {(() => {
-                          const proj = projetosAtivos.find((p: any) => p.nome === nf.camposClassificacao?.projeto);
-                          return proj?.publicoAlvo
-                            ? <span className="text-xs text-slate-400">PA: {proj.publicoAlvo}</span>
-                            : null;
-                        })()}
-                      </div>
+                      nf.camposClassificacao?.projeto || '-'
                     )}
                   </td>
                   <td className="px-3 py-3">
@@ -2071,6 +2119,31 @@ export const NotasFiscais: React.FC = () => {
                       </select>
                     ) : (
                       nf.camposClassificacao?.classificacaoProjetoAtt || '-'
+                    )}
+                  </td>
+                  <td className="px-3 py-3 text-sm">
+                    {nf.camposClassificacao?.publicoAlvo || '-'}
+                  </td>
+                  <td className="px-3 py-3 text-sm">
+                    {inlineEditMode ? (
+                      <input
+                        value={getInlineFieldsForRow(nf).classe}
+                        onChange={(e) => updateInlineFieldForRow(nf, 'classe', e.target.value)}
+                        className="w-36 rounded border border-slate-300 px-2 py-1 text-xs dark:border-slate-600 dark:bg-slate-700"
+                      />
+                    ) : (
+                      nf.camposClassificacao?.classe || '-'
+                    )}
+                  </td>
+                  <td className="px-3 py-3 text-sm">
+                    {inlineEditMode ? (
+                      <input
+                        value={getInlineFieldsForRow(nf).classificacaoConta}
+                        onChange={(e) => updateInlineFieldForRow(nf, 'classificacaoConta', e.target.value)}
+                        className="w-36 rounded border border-slate-300 px-2 py-1 text-xs dark:border-slate-600 dark:bg-slate-700"
+                      />
+                    ) : (
+                      nf.camposClassificacao?.classificacaoConta || '-'
                     )}
                   </td>
                   <td className="px-3 py-3">{nf.status}</td>

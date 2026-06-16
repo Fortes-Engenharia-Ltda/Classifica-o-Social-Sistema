@@ -142,6 +142,9 @@ export class NotaFiscalRepository {
         valor: data.camposClassificacao?.valor ?? null,
         codDocumento: data.camposClassificacao?.codDocumento ?? null,
         observacoes: data.camposClassificacao?.observacoes ?? null,
+        publicoAlvo: data.camposClassificacao?.publicoAlvo ?? null,
+        classe: data.camposClassificacao?.classe ?? null,
+        classificacaoConta: data.camposClassificacao?.classificacaoConta ?? null,
       },
       textoObservacao: data.observacao || null,
     };
@@ -157,7 +160,6 @@ export class NotaFiscalRepository {
             dataEmissao: new Date(data.dataEmissao),
             obraId: data.obraId,
             actionCode: data.actionCode,
-            classificacaoContaId: data.classificacaoContaId,
             status: data.status || 'PENDENTE',
             origemImportacao: data.origemImportacao,
             observacao: encodeNotaFiscalMetadata(metadata),
@@ -336,6 +338,15 @@ export class NotaFiscalRepository {
           ...(data.camposClassificacao.observacoes !== undefined
             ? { observacoes: data.camposClassificacao.observacoes }
             : {}),
+          ...(data.camposClassificacao.publicoAlvo !== undefined
+            ? { publicoAlvo: data.camposClassificacao.publicoAlvo }
+            : {}),
+          ...(data.camposClassificacao.classe !== undefined
+            ? { classe: data.camposClassificacao.classe }
+            : {}),
+          ...(data.camposClassificacao.classificacaoConta !== undefined
+            ? { classificacaoConta: data.camposClassificacao.classificacaoConta }
+            : {}),
         },
         textoObservacao: data.observacao !== undefined ? data.observacao : metadataAtual.textoObservacao,
       };
@@ -467,7 +478,6 @@ export class NotaFiscalRepository {
       ...notaFiscal,
       valor: Number(notaFiscal.valor),
       actionCode: notaFiscal.actionCode ?? null,
-      classificacaoContaId: notaFiscal.classificacaoContaId ?? null,
       periodo,
       localizacao: notaFiscal.obra?.local || notaFiscal.obra?.nomeObra || null,
       observacao: metadata.textoObservacao || metadata.camposOpcionais.observacoes || null,
@@ -507,7 +517,6 @@ export class NotaFiscalRepository {
       dataEmissao: new Date(data.dataEmissao),
       obraId: data.obraId,
       actionCode: data.actionCode ?? null,
-      classificacaoContaId: data.classificacaoContaId ?? null,
       periodo: (() => {
         const dataEmissao = new Date(data.dataEmissao as any);
         return Number.isNaN(dataEmissao.getTime())
@@ -559,6 +568,9 @@ export class NotaFiscalRepository {
             valor: atual.camposClassificacao?.valor || null,
             codDocumento: atual.camposClassificacao?.codDocumento || null,
             observacoes: atual.camposClassificacao?.observacoes || null,
+            publicoAlvo: atual.camposClassificacao?.publicoAlvo || null,
+            classe: atual.camposClassificacao?.classe || null,
+            classificacaoConta: atual.camposClassificacao?.classificacaoConta || null,
           },
           textoObservacao: atual.observacao || null,
         };
@@ -569,10 +581,6 @@ export class NotaFiscalRepository {
       valor: updateData.valor !== undefined ? Number(updateData.valor) : atual.valor,
       dataEmissao: updateData.dataEmissao ? new Date(updateData.dataEmissao) : atual.dataEmissao,
       actionCode: updateData.actionCode !== undefined ? updateData.actionCode : (atual as any).actionCode ?? null,
-      classificacaoContaId:
-        updateData.classificacaoContaId !== undefined
-          ? updateData.classificacaoContaId
-          : (atual as any).classificacaoContaId ?? null,
       periodo: (() => {
         const dataEmissao = new Date((updateData.dataEmissao ? new Date(updateData.dataEmissao) : atual.dataEmissao) as any);
         return Number.isNaN(dataEmissao.getTime())

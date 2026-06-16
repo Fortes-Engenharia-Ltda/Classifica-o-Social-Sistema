@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { ObraService } from '@/services';
 import { DataTable } from '@/components/DataTable';
 import { Obra } from '@/types';
-import { Plus } from 'lucide-react';
+import { Plus, X } from 'lucide-react';
 
 const inputCls = 'w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800 text-sm';
 
@@ -401,7 +401,12 @@ export const Obras: React.FC = () => {
       {showModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white dark:bg-gray-800 rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-            <h2 className="text-xl font-bold mb-4">Nova Obra</h2>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xl font-bold">Nova Obra</h2>
+              <button type="button" onClick={() => { setShowModal(false); setErro(''); }} className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300">
+                <X size={20} />
+              </button>
+            </div>
             <form onSubmit={handleCreate} className="space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <label className="space-y-1">

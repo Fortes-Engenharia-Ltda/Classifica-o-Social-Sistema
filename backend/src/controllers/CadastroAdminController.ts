@@ -533,4 +533,5 @@ export class CadastroAdminController {
       res.status(500).json({ message: 'Erro ao atualizar Público Alvo' });
     }
   }
+
 }

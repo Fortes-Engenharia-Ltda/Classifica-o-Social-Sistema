@@ -262,10 +262,6 @@ export class NotaFiscalService {
 
     const payload: CreateNotaFiscalDTO = { ...data };
 
-    if (payload.classificacaoContaId === undefined) {
-      payload.classificacaoContaId = await this.resolveClassificacaoContaId(payload.actionCode);
-    }
-
     return this.notaFiscalRepository.create(payload);
   }
 
@@ -278,13 +274,7 @@ export class NotaFiscalService {
   }
 
   async update(id: number, data: UpdateNotaFiscalDTO) {
-    const payload: UpdateNotaFiscalDTO = { ...data };
-
-    if (payload.actionCode !== undefined && payload.classificacaoContaId === undefined) {
-      payload.classificacaoContaId = await this.resolveClassificacaoContaId(payload.actionCode);
-    }
-
-    return this.notaFiscalRepository.update(id, payload);
+    return this.notaFiscalRepository.update(id, data);
   }
 
   async delete(id: number) {
@@ -493,7 +483,6 @@ export class NotaFiscalService {
         dataEmissao: dataPagamento || new Date().toISOString(),
         obraId: obraPadrao.id,
         actionCode,
-        classificacaoContaId: contaPorAcao?.id,
         status,
         origemImportacao: 'EXCEL',
         observacao: this.normalizeString(row.Observações) || undefined,

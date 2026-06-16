@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { Plus, CalendarRange, LayoutGrid, Table } from 'lucide-react';
+import { Plus, CalendarRange, LayoutGrid, Table, X } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { ProjetoService } from '@/services';
 import { InstituicaoService } from '@/services/InstituicaoService';
@@ -596,7 +596,12 @@ export const Projetos: React.FC = () => {
       {showModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-md w-full max-h-[90vh] overflow-y-auto">
-            <h2 className="text-xl font-bold mb-4">{editId ? 'Editar Projeto' : 'Novo Projeto'}</h2>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xl font-bold">{editId ? 'Editar Projeto' : 'Novo Projeto'}</h2>
+              <button type="button" onClick={() => { setShowModal(false); setEditId(null); }} className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300">
+                <X size={20} />
+              </button>
+            </div>
             {errorMessage && (
               <div className="mb-4 p-3 bg-red-100 dark:bg-red-900 border border-red-400 dark:border-red-700 text-red-800 dark:text-red-200 rounded-lg text-sm">
                 {errorMessage}
@@ -1058,7 +1063,12 @@ export const Projetos: React.FC = () => {
       {showDistribuicaoModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-lg w-full max-h-[90vh] overflow-y-auto">
-            <h3 className="text-lg font-bold mb-3">Distribuição do Valor Previsto</h3>
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-lg font-bold">Distribuição do Valor Previsto</h3>
+              <button type="button" onClick={() => setShowDistribuicaoModal(false)} className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300">
+                <X size={20} />
+              </button>
+            </div>
             <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">
               Defina data de início, data de fim e valor previsto para ver a distribuição mensal.
             </p>
@@ -1133,15 +1143,20 @@ export const Projetos: React.FC = () => {
                   Código: {selectedProjeto.codigo}
                 </p>
               </div>
-              <span
-                className={`mt-0.5 shrink-0 rounded-full px-2 py-0.5 text-xs font-semibold ${
-                  selectedProjeto.status
-                    ? 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300'
-                    : 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300'
-                }`}
-              >
-                {selectedProjeto.status ? 'Ativo' : 'Inativo'}
-              </span>
+              <div className="flex items-center gap-2 shrink-0">
+                <span
+                  className={`rounded-full px-2 py-0.5 text-xs font-semibold ${
+                    selectedProjeto.status
+                      ? 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300'
+                      : 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300'
+                  }`}
+                >
+                  {selectedProjeto.status ? 'Ativo' : 'Inativo'}
+                </span>
+                <button type="button" onClick={() => setShowViewModal(false)} className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300">
+                  <X size={20} />
+                </button>
+              </div>
             </div>
 
             {imagemProjetoSelecionado && (
@@ -1316,10 +1331,10 @@ export const Projetos: React.FC = () => {
         >
           <button
             type="button"
-            className="absolute top-4 right-4 px-3 py-1.5 rounded bg-white/20 text-white hover:bg-white/30"
+            className="absolute top-4 right-4 p-1.5 rounded bg-white/20 text-white hover:bg-white/30"
             onClick={() => setShowImageLightbox(false)}
           >
-            Fechar
+            <X size={20} />
           </button>
           <img
             src={imagemProjetoSelecionado}

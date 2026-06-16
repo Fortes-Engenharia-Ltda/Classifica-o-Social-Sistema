@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { X } from 'lucide-react';
 import api from '@/services/api';
 import { Programas } from '@/pages/Programas';
 import { Classificacoes } from '@/pages/Classificacoes';
@@ -426,9 +427,14 @@ export const AdminCadastros: React.FC = () => {
           {showContaModal && (
             <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
               <div className="w-full max-w-md rounded-lg bg-white dark:bg-gray-800 p-6">
-                <h2 className="text-xl font-bold mb-4">
-                  {contaEditId ? 'Editar Classificação de Conta' : 'Nova Classificação de Conta'}
-                </h2>
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-xl font-bold">
+                    {contaEditId ? 'Editar Classificação de Conta' : 'Nova Classificação de Conta'}
+                  </h2>
+                  <button type="button" onClick={() => setShowContaModal(false)} className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300">
+                    <X size={20} />
+                  </button>
+                </div>
                 <form onSubmit={salvarConta} className="space-y-3">
                   {erroCadastro && (
                     <div className="rounded-lg border border-red-300 bg-red-50 text-red-700 px-3 py-2 text-sm">
@@ -575,11 +581,16 @@ export const AdminCadastros: React.FC = () => {
           {showNovoOrcadoModal && (
             <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
               <div className="w-full max-w-md rounded-lg bg-white dark:bg-gray-800 p-6">
-                <h2 className="text-xl font-bold mb-4">
-                  {abaAtiva === 'publicos-alvo'
-                    ? (editId ? 'Editar Público Alvo' : 'Novo Público Alvo')
-                    : (editId ? 'Editar Orçado/Não Orçado' : 'Novo Orçado/Não Orçado')}
-                </h2>
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-xl font-bold">
+                    {abaAtiva === 'publicos-alvo'
+                      ? (editId ? 'Editar Público Alvo' : 'Novo Público Alvo')
+                      : (editId ? 'Editar Orçado/Não Orçado' : 'Novo Orçado/Não Orçado')}
+                  </h2>
+                  <button type="button" onClick={() => { setShowNovoOrcadoModal(false); setEditId(null); setErroCadastro(''); }} className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300">
+                    <X size={20} />
+                  </button>
+                </div>
                 <form onSubmit={criar} className="space-y-3">
                   {erroCadastro && (
                     <div className="rounded-lg border border-red-300 bg-red-50 text-red-700 px-3 py-2 text-sm">
