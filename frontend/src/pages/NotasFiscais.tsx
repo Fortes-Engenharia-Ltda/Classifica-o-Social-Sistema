@@ -465,6 +465,32 @@ export const NotasFiscais: React.FC = () => {
     [],
   );
 
+  // Lookup maps de nome -> id para resolver FKs
+  const programaMapId = useMemo(
+    () => new Map<string, number>(
+      programasAtivos.map((p: any) => [String(p.nome || '').trim().toLowerCase(), Number(p.id)]),
+    ),
+    [programasAtivos],
+  );
+  const projetoMapId = useMemo(
+    () => new Map<string, number>(
+      projetosAtivos.map((p: any) => [String(p.nome || '').trim().toLowerCase(), Number(p.id)]),
+    ),
+    [projetosAtivos],
+  );
+  const classificacaoMapId = useMemo(
+    () => new Map<string, number>(
+      classificacoesAtivas.map((c: any) => [String(c.nome || '').trim().toLowerCase(), Number(c.id)]),
+    ),
+    [classificacoesAtivas],
+  );
+  const instituicaoMapId = useMemo(
+    () => new Map<string, number>(
+      instituicoesAtivas.map((i: any) => [String(i.instituicao || '').trim().toLowerCase(), Number(i.id)]),
+    ),
+    [instituicoesAtivas],
+  );
+
   const obraOptions: SearchableOption[] = useMemo(
     () =>
       obrasAtivas.map((obra: any) => ({
@@ -867,6 +893,29 @@ export const NotasFiscais: React.FC = () => {
       (camposClassificacaoParciais as any).valor = Number(camposClassificacaoParciais.valor);
     }
 
+    // Resolve IDs para os campos FK
+    const resolveFkIds = (form: typeof classificacaoForm) => {
+      const fks: Record<string, number | null> = {};
+
+      const prog = String(form.programa || '').trim().toLowerCase();
+      fks.programaId = (prog && programaMapId.get(prog)) ?? null;
+
+      const proj = String(form.projeto || '').trim().toLowerCase();
+      fks.projetoId = (proj && projetoMapId.get(proj)) ?? null;
+
+      const classif = String(form.classificacaoProjetoAtt || '').trim().toLowerCase();
+      fks.classificacaoAttId = (classif && classificacaoMapId.get(classif)) ?? null;
+
+      const inst = String(form.instituicao || '').trim().toLowerCase();
+      fks.instituicaoId = (inst && instituicaoMapId.get(inst)) ?? null;
+
+      if (form.orcadoNaoOrcado === 'ORCADO') fks.orcadoNaoOrcadoId = 1;
+      else if (form.orcadoNaoOrcado === 'NAO_ORCADO') fks.orcadoNaoOrcadoId = 2;
+      else fks.orcadoNaoOrcadoId = null;
+
+      return fks;
+    };
+
     try {
       if (classificarEmLote) {
         if (!selectedIds.length) {
@@ -882,10 +931,12 @@ export const NotasFiscais: React.FC = () => {
         await NotaFiscalService.classificarLote({
           notasFiscaisIds: selectedIds,
           camposClassificacao: camposClassificacaoParciais,
+          ...resolveFkIds(classificacaoForm),
         });
       } else if (notaSelecionada) {
         await NotaFiscalService.update(notaSelecionada.id, {
           camposClassificacao: camposClassificacaoCompletos,
+          ...resolveFkIds(classificacaoForm),
         });
       }
 
@@ -937,6 +988,22 @@ export const NotasFiscais: React.FC = () => {
     if (obraSelecionada?.id) {
       payload.obraId = Number(obraSelecionada.id);
     }
+
+    // Resolve IDs a partir dos nomes selecionados
+    const prog = String(rowFields.programa || '').trim().toLowerCase();
+    if (prog && programaMapId.has(prog)) payload.programaId = programaMapId.get(prog);
+
+    const proj = String(rowFields.projeto || '').trim().toLowerCase();
+    if (proj && projetoMapId.has(proj)) payload.projetoId = projetoMapId.get(proj);
+
+    const classif = String(rowFields.classificacaoProjetoAtt || '').trim().toLowerCase();
+    if (classif && classificacaoMapId.has(classif)) payload.classificacaoAttId = classificacaoMapId.get(classif);
+
+    const inst = String(rowFields.instituicao || '').trim().toLowerCase();
+    if (inst && instituicaoMapId.has(inst)) payload.instituicaoId = instituicaoMapId.get(inst);
+
+    if (rowFields.orcadoNaoOrcado === 'ORCADO') payload.orcadoNaoOrcadoId = 1;
+    else if (rowFields.orcadoNaoOrcado === 'NAO_ORCADO') payload.orcadoNaoOrcadoId = 2;
 
     return payload;
   };

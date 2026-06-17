@@ -78,6 +78,7 @@ model Projeto {
 
   // Relacionamentos
   classificacoes    ClassificacaoNF[]
+  notasFiscais      NotaFiscal[]
   instituicao       InstituicaoSocial? @relation(fields: [instituicaoId], references: [id])
 
   @@map("projetos")
@@ -95,6 +96,7 @@ model Programa {
 
   // Relacionamentos
   classificacoes    ClassificacaoNF[]
+  notasFiscais      NotaFiscal[]
 
   @@map("programas")
 }
@@ -110,6 +112,7 @@ model Classificacao {
 
   // Relacionamentos
   classificacoes    ClassificacaoNF[]
+  notasFiscais      NotaFiscal[]
 
   @@map("classificacoes")
 }
@@ -124,6 +127,7 @@ model OrcadoNaoOrcado {
 
   // Relacionamentos
   classificacaoContas ClassificacaoConta[]
+  notasFiscais        NotaFiscal[]
 
   @@map("d_orcado_nao_orcado")
   @@index([status])
@@ -157,6 +161,12 @@ model NotaFiscal {
   obraId            Int?               @map("obra_id")
   actionCode        Int?               @map("action_code")
   classificacaoContaId Int?            @map("classificacao_conta_id")
+  orcadoNaoOrcadoId Int?               @map("orcado_nao_orcado_id")
+  programaId        Int?               @map("programa_id")
+  instituicaoId     Int?               @map("instituicao_id")
+  projetoId         Int?               @map("projeto_id")
+  classificacaoAttId Int?              @map("classificacao_att_id")
+  publicoAlvoId     Int?               @map("publico_alvo_id")
   status            String             @db.VarChar(20)
   origemImportacao  String?            @map("origem_importacao") @db.VarChar(50)
   observacao        String?            @db.Text
@@ -164,15 +174,27 @@ model NotaFiscal {
   dataAtualizacao   DateTime           @updatedAt @map("data_atualizacao")
 
   // Relacionamentos
-  obra              Obra?              @relation(fields: [obraId], references: [id])
-  classificacaoConta ClassificacaoConta? @relation(fields: [classificacaoContaId], references: [id])
-  classificacoes    ClassificacaoNF[]
-  alertas           Alerta[]
+  obra                Obra?                @relation(fields: [obraId], references: [id])
+  classificacaoConta  ClassificacaoConta?  @relation(fields: [classificacaoContaId], references: [id])
+  orcadoNaoOrcado     OrcadoNaoOrcado?     @relation(fields: [orcadoNaoOrcadoId], references: [id])
+  programa            Programa?            @relation(fields: [programaId], references: [id])
+  instituicao         InstituicaoSocial?   @relation(fields: [instituicaoId], references: [id])
+  projeto             Projeto?             @relation(fields: [projetoId], references: [id])
+  classificacaoAtt    Classificacao?       @relation(fields: [classificacaoAttId], references: [id])
+  publicoAlvo         PublicoAlvo?         @relation(fields: [publicoAlvoId], references: [id])
+  classificacoes      ClassificacaoNF[]
+  alertas             Alerta[]
 
   @@map("notas_fiscais")
   @@index([obraId])
   @@index([status])
   @@index([classificacaoContaId])
+  @@index([orcadoNaoOrcadoId])
+  @@index([programaId])
+  @@index([instituicaoId])
+  @@index([projetoId])
+  @@index([classificacaoAttId])
+  @@index([publicoAlvoId])
 }
 
 model ClassificacaoNF {
@@ -284,6 +306,7 @@ model InstituicaoSocial {
   responsaveis            ResponsavelInstituicao[]
   responsaveisTecnicos    ResponsavelTecnico[]
   projetos                Projeto[]
+  notasFiscais            NotaFiscal[]
 
   @@map("instituicoes_sociais")
   @@index([instituicao])
@@ -300,6 +323,9 @@ model PublicoAlvo {
   status            Boolean            @default(true)
   dataCriacao       DateTime           @default(now()) @map("data_criacao")
   dataAtualizacao   DateTime           @updatedAt @map("data_atualizacao")
+
+  // Relacionamentos
+  notasFiscais      NotaFiscal[]
 
   @@map("publicos_alvo")
   @@index([status])

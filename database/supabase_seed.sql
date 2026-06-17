@@ -35,17 +35,17 @@ INSERT INTO "classificacoes" ("codigo", "nome", "categoria", "status", "data_cri
 ('CLASS-003', 'Recursos Humanos', 'RH', true, NOW(), NOW())
 ON CONFLICT ("codigo") DO NOTHING;
 
-INSERT INTO "notas_fiscais" ("numero_nf", "fornecedor", "cnpj", "valor", "data_emissao", "obra_id", "status", "origem_importacao", "observacao", "data_criacao", "data_atualizacao")
-SELECT 'NF-001-2024', 'Fornecedor A', '12.345.678/0001-90', 5000.00, DATE '2024-01-15', o.id, 'PENDENTE', 'MANUAL', 'Nota fiscal de teste', NOW(), NOW()
+INSERT INTO "notas_fiscais" ("numero_nf", "fornecedor", "cnpj", "valor", "data_emissao", "obra_id", "action_code", "classificacao_conta_id", "orcado_nao_orcado_id", "programa_id", "instituicao_id", "projeto_id", "classificacao_att_id", "publico_alvo_id", "status", "origem_importacao", "observacao", "data_criacao", "data_atualizacao")
+SELECT 'NF-001-2024', 'Fornecedor A', '12.345.678/0001-90', 5000.00, DATE '2024-01-15', o.id, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'PENDENTE', 'MANUAL', 'Nota fiscal de teste', NOW(), NOW()
 FROM "obras" o WHERE o."codigo_obra" = 'OBR-001'
 ON CONFLICT DO NOTHING;
 
-INSERT INTO "notas_fiscais" ("numero_nf", "fornecedor", "cnpj", "valor", "data_emissao", "obra_id", "status", "origem_importacao", "observacao", "data_criacao", "data_atualizacao")
-SELECT 'NF-002-2024', 'Fornecedor B', '98.765.432/0001-10', 10000.00, DATE '2024-02-20', o.id, 'CLASSIFICADA', 'MEGA', 'Importada do sistema Mega', NOW(), NOW()
+INSERT INTO "notas_fiscais" ("numero_nf", "fornecedor", "cnpj", "valor", "data_emissao", "obra_id", "action_code", "classificacao_conta_id", "orcado_nao_orcado_id", "programa_id", "instituicao_id", "projeto_id", "classificacao_att_id", "publico_alvo_id", "status", "origem_importacao", "observacao", "data_criacao", "data_atualizacao")
+SELECT 'NF-002-2024', 'Fornecedor B', '98.765.432/0001-10', 10000.00, DATE '2024-02-20', o.id, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'CLASSIFICADA', 'MEGA', 'Importada do sistema Mega', NOW(), NOW()
 FROM "obras" o WHERE o."codigo_obra" = 'OBR-002'
 ON CONFLICT DO NOTHING;
 
-INSERT INTO "notas_fiscais" ("numero_nf", "fornecedor", "cnpj", "valor", "data_emissao", "obra_id", "status", "origem_importacao", "observacao", "data_criacao", "data_atualizacao")
-SELECT 'NF-003-2024', 'Fornecedor C', '55.555.555/0001-55', 7500.00, DATE '2024-03-10', o.id, 'PENDENTE', 'SOX', 'Importada do sistema SOX', NOW(), NOW()
+INSERT INTO "notas_fiscais" ("numero_nf", "fornecedor", "cnpj", "valor", "data_emissao", "obra_id", "action_code", "classificacao_conta_id", "orcado_nao_orcado_id", "programa_id", "instituicao_id", "projeto_id", "classificacao_att_id", "publico_alvo_id", "status", "origem_importacao", "observacao", "data_criacao", "data_atualizacao")
+SELECT 'NF-003-2024', 'Fornecedor C', '55.555.555/0001-55', 7500.00, DATE '2024-03-10', o.id, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'PENDENTE', 'SOX', 'Importada do sistema SOX', NOW(), NOW()
 FROM "obras" o WHERE o."codigo_obra" = 'OBR-003'
 ON CONFLICT DO NOTHING;

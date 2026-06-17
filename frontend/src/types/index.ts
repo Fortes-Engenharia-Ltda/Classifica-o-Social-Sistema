@@ -94,8 +94,15 @@ export interface NotaFiscal {
   obraId: number;
   actionCode?: number | null;
   classificacaoContaId?: number | null;
+  orcadoNaoOrcadoId?: number | null;
+  programaId?: number | null;
+  instituicaoId?: number | null;
+  projetoId?: number | null;
+  classificacaoAttId?: number | null;
+  publicoAlvoId?: number | null;
   periodo?: string;
   localizacao?: string | null;
+  unidadeNegocio?: string | null;
   status: 'PENDENTE' | 'CLASSIFICADA' | 'CONCLUIDA';
   origemImportacao?: string;
   observacao?: string;

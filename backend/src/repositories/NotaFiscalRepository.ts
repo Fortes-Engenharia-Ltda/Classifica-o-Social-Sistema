@@ -160,18 +160,17 @@ export class NotaFiscalRepository {
             dataEmissao: new Date(data.dataEmissao),
             obraId: data.obraId,
             actionCode: data.actionCode,
+            orcadoNaoOrcadoId: data.orcadoNaoOrcadoId ?? null,
+            programaId: data.programaId ?? null,
+            instituicaoId: data.instituicaoId ?? null,
+            projetoId: data.projetoId ?? null,
+            classificacaoAttId: data.classificacaoAttId ?? null,
+            publicoAlvoId: data.publicoAlvoId ?? null,
             status: data.status || 'PENDENTE',
             origemImportacao: data.origemImportacao,
             observacao: encodeNotaFiscalMetadata(metadata),
           },
-          include: {
-            obra: {
-              select: {
-                local: true,
-                nomeObra: true,
-              },
-            },
-          },
+          include: this.defaultIncludes(),
         });
 
         return this.mapResponse(notaFiscal);
@@ -180,19 +179,42 @@ export class NotaFiscalRepository {
     );
   }
 
+  private defaultIncludes() {
+    return {
+      obra: {
+        select: {
+          local: true,
+          nomeObra: true,
+          un: true,
+        },
+      },
+      orcadoNaoOrcado: {
+        select: { id: true, nome: true, codigo: true },
+      },
+      programa: {
+        select: { id: true, nome: true },
+      },
+      instituicao: {
+        select: { id: true, instituicao: true },
+      },
+      projeto: {
+        select: { id: true, nome: true, publicoAlvo: true },
+      },
+      classificacaoAtt: {
+        select: { id: true, nome: true },
+      },
+      publicoAlvo: {
+        select: { id: true, nome: true },
+      },
+    };
+  }
+
   async findById(id: number): Promise<NotaFiscalResponseDTO | null> {
     return runWithPrismaFallback(
       async () => {
         const notaFiscal = await prisma.notaFiscal.findUnique({
           where: { id },
-          include: {
-            obra: {
-              select: {
-                local: true,
-                nomeObra: true,
-              },
-            },
-          },
+          include: this.defaultIncludes(),
         });
 
         return notaFiscal ? this.mapResponse(notaFiscal) : null;
@@ -229,14 +251,7 @@ export class NotaFiscalRepository {
         const notasFiscais = await prisma.notaFiscal.findMany({
           where,
           orderBy: { dataCriacao: 'desc' },
-          include: {
-            obra: {
-              select: {
-                local: true,
-                nomeObra: true,
-              },
-            },
-          },
+          include: this.defaultIncludes(),
         });
 
         const filtrados = this.applyAdvancedFilters(
@@ -367,14 +382,7 @@ export class NotaFiscalRepository {
         const notaFiscal = await prisma.notaFiscal.update({
           where: { id },
           data: updateData,
-          include: {
-            obra: {
-              select: {
-                local: true,
-                nomeObra: true,
-              },
-            },
-          },
+          include: this.defaultIncludes(),
         });
 
         return this.mapResponse(notaFiscal);
@@ -474,18 +482,67 @@ export class NotaFiscalRepository {
       ? ''
       : `${String(dataEmissao.getMonth() + 1).padStart(2, '0')}/${dataEmissao.getFullYear()}`;
 
+    // Resolve nomes a partir das tabelas relacionadas (FK), com fallback para JSON observacao
+    const orcadoNaoOrcado = notaFiscal.orcadoNaoOrcado?.nome
+      ?? metadata.camposObrigatorios.orcadoNaoOrcado
+      ?? null;
+    const programa = notaFiscal.programa?.nome
+      ?? metadata.camposObrigatorios.programa
+      ?? null;
+    const instituicao = notaFiscal.instituicao?.instituicao
+      ?? metadata.camposObrigatorios.instituicao
+      ?? null;
+    const projeto = notaFiscal.projeto?.nome
+      ?? metadata.camposObrigatorios.projeto
+      ?? null;
+    const classificacaoProjetoAtt = notaFiscal.classificacaoAtt?.nome
+      ?? metadata.camposObrigatorios.classificacaoProjetoAtt
+      ?? null;
+    const unidadeNegocio = notaFiscal.obra?.un
+      ?? metadata.camposOpcionais.unidadeNegocio
+      ?? null;
+    const publicoAlvo = notaFiscal.publicoAlvo?.nome
+      ?? notaFiscal.projeto?.publicoAlvo
+      ?? metadata.camposOpcionais.publicoAlvo
+      ?? null;
+
     return {
       ...notaFiscal,
       valor: Number(notaFiscal.valor),
       actionCode: notaFiscal.actionCode ?? null,
+      orcadoNaoOrcadoId: notaFiscal.orcadoNaoOrcadoId ?? null,
+      programaId: notaFiscal.programaId ?? null,
+      instituicaoId: notaFiscal.instituicaoId ?? null,
+      projetoId: notaFiscal.projetoId ?? null,
+      classificacaoAttId: notaFiscal.classificacaoAttId ?? null,
+      publicoAlvoId: notaFiscal.publicoAlvoId ?? null,
       periodo,
       localizacao: notaFiscal.obra?.local || notaFiscal.obra?.nomeObra || null,
+      unidadeNegocio,
       observacao: metadata.textoObservacao || metadata.camposOpcionais.observacoes || null,
       camposClassificacao: {
-        ...metadata.camposObrigatorios,
+        orcadoNaoOrcado,
+        programa,
+        instituicao,
+        projeto,
+        classificacaoProjetoAtt,
+        unidadeNegocio,
+        publicoAlvo,
         ...metadata.camposOpcionais,
+        ...(notaFiscal.classificacaoConta?.nome
+          ? { classificacaoConta: notaFiscal.classificacaoConta.nome }
+          : {}),
       },
-      pendenteClassificacao: hasPendenciaClassificacao(metadata),
+      pendenteClassificacao: hasPendenciaClassificacao({
+        ...metadata,
+        camposObrigatorios: {
+          orcadoNaoOrcado,
+          programa,
+          instituicao,
+          projeto,
+          classificacaoProjetoAtt,
+        },
+      }),
     };
   }
 

@@ -44,6 +44,24 @@ CREATE TABLE IF NOT EXISTS classificacoes (
     status BOOLEAN DEFAULT TRUE
 );
 
+CREATE TABLE IF NOT EXISTS publicos_alvo (
+    id SERIAL PRIMARY KEY,
+    nome VARCHAR(200) NOT NULL,
+    status BOOLEAN DEFAULT TRUE,
+    data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    data_atualizacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS classificacao_contas (
+    id SERIAL PRIMARY KEY,
+    codigo_acao INTEGER NOT NULL UNIQUE,
+    nome VARCHAR(120) NOT NULL,
+    orcado_nao_orcado_id INTEGER NOT NULL REFERENCES d_orcado_nao_orcado(id),
+    status BOOLEAN DEFAULT TRUE,
+    data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    data_atualizacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
 CREATE TABLE IF NOT EXISTS notas_fiscais (
     id SERIAL PRIMARY KEY,
     numero_nf VARCHAR(50) NOT NULL,
@@ -52,9 +70,19 @@ CREATE TABLE IF NOT EXISTS notas_fiscais (
     valor NUMERIC(15,2),
     data_emissao DATE,
     obra_id INTEGER REFERENCES obras(id),
+    action_code INTEGER,
+    classificacao_conta_id INTEGER REFERENCES classificacao_contas(id),
+    orcado_nao_orcado_id INTEGER REFERENCES d_orcado_nao_orcado(id),
+    programa_id INTEGER REFERENCES programas(id),
+    instituicao_id INTEGER REFERENCES instituicoes_sociais(id),
+    projeto_id INTEGER REFERENCES projetos(id),
+    classificacao_att_id INTEGER REFERENCES classificacoes(id),
+    publico_alvo_id INTEGER REFERENCES publicos_alvo(id),
     status VARCHAR(20),
     origem_importacao VARCHAR(50),
-    observacao TEXT
+    observacao TEXT,
+    data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    data_atualizacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE IF NOT EXISTS classificacoes_nf (

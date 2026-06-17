@@ -99,6 +99,30 @@ CREATE TABLE "d_orcado_nao_orcado" (
 );
 
 -- CreateTable
+CREATE TABLE "publicos_alvo" (
+    "id" SERIAL NOT NULL,
+    "nome" VARCHAR(200) NOT NULL,
+    "status" BOOLEAN NOT NULL DEFAULT true,
+    "data_criacao" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "data_atualizacao" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "publicos_alvo_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "classificacao_contas" (
+    "id" SERIAL NOT NULL,
+    "codigo_acao" INTEGER NOT NULL,
+    "nome" VARCHAR(120) NOT NULL,
+    "orcado_nao_orcado_id" INTEGER NOT NULL,
+    "status" BOOLEAN NOT NULL DEFAULT true,
+    "data_criacao" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "data_atualizacao" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "classificacao_contas_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
 CREATE TABLE "notas_fiscais" (
     "id" SERIAL NOT NULL,
     "numero_nf" VARCHAR(50) NOT NULL,
@@ -107,6 +131,14 @@ CREATE TABLE "notas_fiscais" (
     "valor" DECIMAL(15,2) NOT NULL,
     "data_emissao" DATE NOT NULL,
     "obra_id" INTEGER,
+    "action_code" INTEGER,
+    "classificacao_conta_id" INTEGER,
+    "orcado_nao_orcado_id" INTEGER,
+    "programa_id" INTEGER,
+    "instituicao_id" INTEGER,
+    "projeto_id" INTEGER,
+    "classificacao_att_id" INTEGER,
+    "publico_alvo_id" INTEGER,
     "status" VARCHAR(20) NOT NULL,
     "origem_importacao" VARCHAR(50),
     "observacao" TEXT,
@@ -272,10 +304,25 @@ CREATE UNIQUE INDEX "d_orcado_nao_orcado_nome_key" ON "d_orcado_nao_orcado"("nom
 CREATE INDEX "d_orcado_nao_orcado_status_idx" ON "d_orcado_nao_orcado"("status");
 
 -- CreateIndex
+CREATE UNIQUE INDEX "classificacao_contas_codigo_acao_key" ON "classificacao_contas"("codigo_acao");
+
+-- CreateIndex
+CREATE INDEX "publicos_alvo_status_idx" ON "publicos_alvo"("status");
+
+-- CreateIndex
 CREATE INDEX "notas_fiscais_obra_id_idx" ON "notas_fiscais"("obra_id");
 
 -- CreateIndex
 CREATE INDEX "notas_fiscais_status_idx" ON "notas_fiscais"("status");
+
+-- CreateIndex
+CREATE INDEX "notas_fiscais_classificacao_conta_id_idx" ON "notas_fiscais"("classificacao_conta_id");
+
+-- CreateIndex
+CREATE INDEX "classificacao_contas_status_idx" ON "classificacao_contas"("status");
+
+-- CreateIndex
+CREATE INDEX "classificacao_contas_orcado_nao_orcado_id_idx" ON "classificacao_contas"("orcado_nao_orcado_id");
 
 -- CreateIndex
 CREATE INDEX "classificacoes_nf_nota_fiscal_id_idx" ON "classificacoes_nf"("nota_fiscal_id");
@@ -321,6 +368,30 @@ CREATE INDEX "responsaveis_tecnicos_instituicao_id_idx" ON "responsaveis_tecnico
 
 -- AddForeignKey
 ALTER TABLE "notas_fiscais" ADD CONSTRAINT "notas_fiscais_obra_id_fkey" FOREIGN KEY ("obra_id") REFERENCES "obras"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "notas_fiscais" ADD CONSTRAINT "notas_fiscais_classificacao_conta_id_fkey" FOREIGN KEY ("classificacao_conta_id") REFERENCES "classificacao_contas"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "notas_fiscais" ADD CONSTRAINT "notas_fiscais_orcado_nao_orcado_id_fkey" FOREIGN KEY ("orcado_nao_orcado_id") REFERENCES "d_orcado_nao_orcado"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "notas_fiscais" ADD CONSTRAINT "notas_fiscais_programa_id_fkey" FOREIGN KEY ("programa_id") REFERENCES "programas"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "notas_fiscais" ADD CONSTRAINT "notas_fiscais_instituicao_id_fkey" FOREIGN KEY ("instituicao_id") REFERENCES "instituicoes_sociais"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "notas_fiscais" ADD CONSTRAINT "notas_fiscais_projeto_id_fkey" FOREIGN KEY ("projeto_id") REFERENCES "projetos"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "notas_fiscais" ADD CONSTRAINT "notas_fiscais_classificacao_att_id_fkey" FOREIGN KEY ("classificacao_att_id") REFERENCES "classificacoes"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "notas_fiscais" ADD CONSTRAINT "notas_fiscais_publico_alvo_id_fkey" FOREIGN KEY ("publico_alvo_id") REFERENCES "publicos_alvo"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "classificacao_contas" ADD CONSTRAINT "classificacao_contas_orcado_nao_orcado_id_fkey" FOREIGN KEY ("orcado_nao_orcado_id") REFERENCES "d_orcado_nao_orcado"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "classificacoes_nf" ADD CONSTRAINT "classificacoes_nf_nota_fiscal_id_fkey" FOREIGN KEY ("nota_fiscal_id") REFERENCES "notas_fiscais"("id") ON DELETE CASCADE ON UPDATE CASCADE;
