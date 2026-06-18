@@ -33,6 +33,36 @@ export class DashboardController {
     }
   }
 
+  private getRegiao(local?: string | null): string | null {
+    const valor = String(local || '').trim().toUpperCase();
+    if (!valor) return null;
+
+    // Mapa de UF -> Região
+    const regioes: Record<string, string[]> = {
+      'Norte': ['AC', 'AP', 'AM', 'PA', 'RO', 'RR', 'TO'],
+      'Nordeste': ['AL', 'BA', 'CE', 'MA', 'PB', 'PE', 'PI', 'RN', 'SE'],
+      'Centro-Oeste': ['DF', 'GO', 'MS', 'MT'],
+      'Sudeste': ['ES', 'MG', 'RJ', 'SP'],
+      'Sul': ['PR', 'RS', 'SC'],
+    };
+
+    // Tenta extrair UF do local (ex: "São Paulo - SP" ou "SP")
+    const ufMatch = valor.match(/\b([A-Z]{2})\b$/);
+    if (ufMatch) {
+      const uf = ufMatch[1];
+      for (const [regiao, ufs] of Object.entries(regioes)) {
+        if (ufs.includes(uf)) return regiao;
+      }
+    }
+
+    // Tenta encontrar nome da região diretamente no texto
+    for (const regiao of Object.keys(regioes)) {
+      if (valor.includes(regiao.toUpperCase())) return regiao;
+    }
+
+    return null;
+  }
+
   private normalize(value: unknown): string {
     return String(value || '')
       .normalize('NFD')
@@ -256,6 +286,8 @@ export class DashboardController {
                     nomeObra: true,
                     codigoObra: true,
                     local: true,
+                    un: true,
+                    cidade: true,
                   },
                 },
                 classificacoes: {
@@ -429,6 +461,7 @@ export class DashboardController {
           const valorPorClassificacaoMap = new Map<string, number>();
           const nfPorOrcadoMap = new Map<string, number>();
           const nfPorLocalizacaoMap = new Map<string, number>();
+          const nfPorRegiaoMap = new Map<string, number>();
           const valorPorOrcadoMap = new Map<string, number>();
           const valorPorLocalizacaoMap = new Map<string, number>();
 
@@ -474,6 +507,12 @@ export class DashboardController {
 
             nfPorLocalizacaoMap.set(localizacao, (nfPorLocalizacaoMap.get(localizacao) || 0) + 1);
             valorPorLocalizacaoMap.set(localizacao, (valorPorLocalizacaoMap.get(localizacao) || 0) + valorNF);
+
+            const regiao = this.getRegiao(nf.obra?.local)
+              ?? this.getRegiao(nf.obra?.cidade)
+              ?? this.getRegiao(nf.obra?.un)
+              ?? 'Não classificado';
+            nfPorRegiaoMap.set(regiao, (nfPorRegiaoMap.get(regiao) || 0) + 1);
           }
 
           const projetosCurva = projetosResumo
@@ -517,6 +556,9 @@ export class DashboardController {
               totalObras,
               obrasAtivas,
               obrasInativas,
+              distribuicaoPorRegiao: Array.from(nfPorRegiaoMap.entries())
+                .map(([name, value]) => ({ name, value }))
+                .sort((a, b) => b.value - a.value),
               valorPrevistoProjetos,
               valorRealizadoProjetos,
               totalPessoasImpactadas,
@@ -615,6 +657,7 @@ export class DashboardController {
               distribuicaoPorPrograma: [],
               distribuicaoPorClassificacao: [],
               distribuicaoPorOrcado: [],
+              distribuicaoPorRegiao: [],
               distribuicaoPorLocalizacao: Array.from(nfPorLocalizacaoMap.entries())
                 .map(([name, value]) => ({ name, value }))
                 .sort((a, b) => b.value - a.value),

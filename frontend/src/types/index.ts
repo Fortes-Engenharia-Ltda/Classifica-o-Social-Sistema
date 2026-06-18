@@ -160,6 +160,7 @@ export interface Metricas {
   distribuicaoPorClassificacao?: Array<{ name: string; value: number }>;
   distribuicaoPorOrcado?: Array<{ name: string; value: number }>;
   distribuicaoPorLocalizacao?: Array<{ name: string; value: number }>;
+  distribuicaoPorRegiao?: Array<{ name: string; value: number }>;
   curvaPrevistoRealizadoProjetos?: Array<{ projeto: string; previsto: number; realizado: number }>;
   curvaPrevistoRealizadoMensalProjetos?: {
     competencias: string[];
