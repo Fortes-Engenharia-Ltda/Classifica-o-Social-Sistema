@@ -303,7 +303,7 @@ export const ConfiguracaoSistema: React.FC = () => {
     limparMensagens();
     setSavingModules(true);
     try {
-      await SystemConfigService.updateModuleVisibilityConfig(perfil, moduleVisibility[perfil]);
+      await SystemConfigService.updateModuleVisibilityConfig(perfil, moduleVisibility[perfil as RolePerfil]);
       setFeedback(`Módulos do perfil ${ROLE_LABELS[perfil as RolePerfil] || perfil} atualizados com sucesso`);
     } catch (err: any) {
       setErro(err?.response?.data?.message || 'Erro ao salvar módulos por perfil');
@@ -685,13 +685,13 @@ export const ConfiguracaoSistema: React.FC = () => {
                   <label key={moduleKey} className="flex items-center gap-2 rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-slate-700">
                     <input
                       type="checkbox"
-                      checked={Boolean(moduleVisibility[perfil]?.[moduleKey])}
+                      checked={Boolean(moduleVisibility[perfil as RolePerfil]?.[moduleKey])}
                       onChange={(e) => {
                         const checked = e.target.checked;
                         setModuleVisibility((curr) => ({
                           ...curr,
                           [perfil]: {
-                            ...curr[perfil],
+                            ...curr[perfil as RolePerfil],
                             [moduleKey]: checked,
                           },
                         }));

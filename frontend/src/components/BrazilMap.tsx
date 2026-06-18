@@ -1,73 +1,43 @@
 import React, { useState } from 'react';
-import { ComposableMap, Geographies, Geography, Marker, ZoomableGroup } from 'react-simple-maps';
 
-const BRAZIL_TOPOJSON = 'https://cdn.jsdelivr.net/npm/topojson-atlas@0.2/countries/bra-2.json';
+const BRAZIL_PATH = 'M145 95L155 85L170 80L185 75L200 70L220 68L240 65L260 60L280 55L300 50L320 48L340 50L350 55L360 60L370 65L380 70L390 75L400 80L410 85L420 90L430 95L440 100L450 110L460 120L465 130L470 140L475 150L480 160L485 170L490 180L495 190L500 200L505 210L510 220L515 230L520 240L525 250L530 260L535 270L540 280L545 290L550 300L555 310L560 320L565 330L570 340L575 350L580 360L585 370L590 380L595 390L600 400L605 410L610 420L615 430L620 440L625 450L630 460L635 470L640 480L645 490L650 500L655 510L660 520L665 530L670 540L675 550L680 560L685 570L690 580L695 590L700 600L705 610L710 620L715 630L720 640L725 650L730 660L735 670L740 680L745 690L750 700L755 710L760 720L765 730L770 740L775 750L780 760L785 770L790 780L795 790L800 800L0 800L0 0L145 95Z';
 
-const ESTADO_COORDS: Record<string, [number, number]> = {
-  AC: [-67.808, -9.974],
-  AL: [-36.782, -9.571],
-  AM: [-64.0, -4.0],
-  AP: [-52.0, 1.0],
-  BA: [-42.0, -13.0],
-  CE: [-39.5, -5.0],
-  DF: [-47.93, -15.78],
-  ES: [-40.5, -19.5],
-  GO: [-49.5, -16.0],
-  MA: [-45.0, -6.0],
-  MG: [-44.5, -18.5],
-  MS: [-55.0, -20.0],
-  MT: [-56.0, -13.0],
-  PA: [-53.0, -4.0],
-  PB: [-36.5, -7.0],
-  PE: [-37.5, -8.5],
-  PI: [-42.5, -7.0],
-  PR: [-51.5, -25.0],
-  RJ: [-43.0, -22.5],
-  RN: [-36.5, -5.8],
-  RO: [-63.0, -11.0],
-  RR: [-61.0, 2.0],
-  RS: [-53.0, -30.5],
-  SC: [-50.5, -27.0],
-  SE: [-37.5, -10.5],
-  SP: [-48.0, -23.5],
-  TO: [-48.5, -10.0],
-};
-
-const ESTADO_NAMES: Record<string, string> = {
-  AC: 'Acre',
-  AL: 'Alagoas',
-  AM: 'Amazonas',
-  AP: 'Amapá',
-  BA: 'Bahia',
-  CE: 'Ceará',
-  DF: 'Distrito Federal',
-  ES: 'Espírito Santo',
-  GO: 'Goiás',
-  MA: 'Maranhão',
-  MG: 'Minas Gerais',
-  MS: 'Mato Grosso do Sul',
-  MT: 'Mato Grosso',
-  PA: 'Pará',
-  PB: 'Paraíba',
-  PE: 'Pernambuco',
-  PI: 'Piauí',
-  PR: 'Paraná',
-  RJ: 'Rio de Janeiro',
-  RN: 'Rio Grande do Norte',
-  RO: 'Rondônia',
-  RR: 'Roraima',
-  RS: 'Rio Grande do Sul',
-  SC: 'Santa Catarina',
-  SE: 'Sergipe',
-  SP: 'São Paulo',
-  TO: 'Tocantins',
-};
-
-type EstadoData = {
+interface EstadoCoord {
   sigla: string;
-  quantidade: number;
-  valor: number;
-};
+  nome: string;
+  x: number;
+  y: number;
+}
+
+const ESTADOS: EstadoCoord[] = [
+  { sigla: 'AC', nome: 'Acre', x: 180, y: 420 },
+  { sigla: 'AL', nome: 'Alagoas', x: 460, y: 440 },
+  { sigla: 'AM', nome: 'Amazonas', x: 220, y: 280 },
+  { sigla: 'AP', nome: 'Amapá', x: 380, y: 120 },
+  { sigla: 'BA', nome: 'Bahia', x: 500, y: 380 },
+  { sigla: 'CE', nome: 'Ceará', x: 490, y: 250 },
+  { sigla: 'DF', nome: 'Distrito Federal', x: 420, y: 520 },
+  { sigla: 'ES', nome: 'Espírito Santo', x: 540, y: 540 },
+  { sigla: 'GO', nome: 'Goiás', x: 380, y: 520 },
+  { sigla: 'MA', nome: 'Maranhão', x: 420, y: 220 },
+  { sigla: 'MG', nome: 'Minas Gerais', x: 480, y: 560 },
+  { sigla: 'MS', nome: 'Mato Grosso do Sul', x: 320, y: 580 },
+  { sigla: 'MT', nome: 'Mato Grosso', x: 300, y: 420 },
+  { sigla: 'PA', nome: 'Pará', x: 340, y: 200 },
+  { sigla: 'PB', nome: 'Paraíba', x: 510, y: 300 },
+  { sigla: 'PE', nome: 'Pernambuco', x: 500, y: 340 },
+  { sigla: 'PI', nome: 'Piauí', x: 440, y: 300 },
+  { sigla: 'PR', nome: 'Paraná', x: 440, y: 670 },
+  { sigla: 'RJ', nome: 'Rio de Janeiro', x: 540, y: 610 },
+  { sigla: 'RN', nome: 'Rio Grande do Norte', x: 520, y: 270 },
+  { sigla: 'RO', nome: 'Rondônia', x: 220, y: 460 },
+  { sigla: 'RR', nome: 'Roraima', x: 290, y: 120 },
+  { sigla: 'RS', nome: 'Rio Grande do Sul', x: 420, y: 740 },
+  { sigla: 'SC', nome: 'Santa Catarina', x: 440, y: 700 },
+  { sigla: 'SE', nome: 'Sergipe', x: 490, y: 420 },
+  { sigla: 'SP', nome: 'São Paulo', x: 510, y: 630 },
+  { sigla: 'TO', nome: 'Tocantins', x: 390, y: 350 },
+];
 
 type BrazilMapProps = {
   distribuicaoPorEstado?: Array<{ name: string; value: number }>;
@@ -80,105 +50,96 @@ const BrazilMap: React.FC<BrazilMapProps> = ({ distribuicaoPorEstado = [], valor
   const [hoveredSigla, setHoveredSigla] = useState<string | null>(null);
 
   const valorMap = new Map<string, number>();
-  valoresPorEstado.forEach((item) => {
-    valorMap.set(item.name, item.value);
-  });
+  valoresPorEstado.forEach((item) => valorMap.set(item.name, item.value));
 
   const quantidadeMap = new Map<string, number>();
-  distribuicaoPorEstado.forEach((item) => {
-    quantidadeMap.set(item.name, item.value);
-  });
+  distribuicaoPorEstado.forEach((item) => quantidadeMap.set(item.name, item.value));
 
   const maxValor = Math.max(...Array.from(valorMap.values()), 1);
 
-  const estadosData: EstadoData[] = Object.keys(ESTADO_COORDS).map((sigla) => ({
-    sigla,
-    quantidade: quantidadeMap.get(sigla) || 0,
-    valor: valorMap.get(sigla) || 0,
-  }));
-
-  const estadosComDados = estadosData.filter((e) => e.valor > 0);
+  const estadosComDados = ESTADOS.filter((e) => (valorMap.get(e.sigla) || 0) > 0);
 
   return (
-    <div className="relative w-full" style={{ height: 400 }}>
-      <ComposableMap
-        projection="geoMercator"
-        projectionConfig={{
-          center: [-55, -14],
-          scale: 650,
-        }}
-        style={{ width: '100%', height: '100%' }}
-      >
-        <ZoomableGroup maxZoom={4} minZoom={1}>
-          <Geographies geography={BRAZIL_TOPOJSON}>
-            {({ geographies }: { geographies: any[] }) =>
-              geographies.map((geo: any) => {
-                const geoUf = geo.properties?.iso || '';
-                const isHovered = hoveredSigla === geoUf;
-                return (
-                  <Geography
-                    key={geo.rsmKey}
-                    geography={geo}
-                    fill={isHovered ? '#e2e8f0' : '#f1f5f9'}
-                    stroke="#cbd5e1"
-                    strokeWidth={0.5}
-                    style={{
-                      default: { outline: 'none' },
-                      hover: { fill: '#e2e8f0', outline: 'none' },
-                      pressed: { outline: 'none' },
-                    }}
-                  />
-                );
-              })
-            }
-          </Geographies>
+    <div className="relative w-full" style={{ height: 440 }}>
+      <svg viewBox="0 0 700 800" className="h-full w-full" style={{ fontFamily: 'system-ui, sans-serif' }}>
+        <defs>
+          <filter id="mapShadow">
+            <feDropShadow dx={0} dy={0} stdDeviation={1} floodColor="#94a3b8" floodOpacity={0.3} />
+          </filter>
+        </defs>
 
-          {estadosComDados.map((estado) => {
-            const coords = ESTADO_COORDS[estado.sigla];
-            if (!coords) return null;
+        <path d={BRAZIL_PATH} fill="#f1f5f9" stroke="#cbd5e1" strokeWidth={1} filter="url(#mapShadow)" />
 
-            const radius = Math.max(6, Math.sqrt(estado.valor / maxValor) * 30);
+        {estadosComDados.map((estado) => {
+          const valor = valorMap.get(estado.sigla) || 0;
+          const quantidade = quantidadeMap.get(estado.sigla) || 0;
+          const radius = Math.max(8, Math.sqrt(valor / maxValor) * 35);
+          const isHovered = hoveredSigla === estado.sigla;
 
-            return (
-              <Marker key={estado.sigla} coordinates={coords}>
-                <circle
-                  r={radius}
-                  fill="rgba(6, 182, 212, 0.6)"
-                  stroke="rgba(6, 182, 212, 0.9)"
-                  strokeWidth={2}
-                  style={{ cursor: 'pointer' }}
-                  onMouseEnter={(e: React.MouseEvent) => {
-                    setHoveredSigla(estado.sigla);
-                    setTooltip({ sigla: estado.sigla, x: e.clientX, y: e.clientY });
-                  }}
-                  onMouseLeave={() => {
-                    setHoveredSigla(null);
-                    setTooltip(null);
-                  }}
-                  onMouseMove={(e: React.MouseEvent) => {
-                    setTooltip({ sigla: estado.sigla, x: e.clientX, y: e.clientY });
-                  }}
-                />
+          return (
+            <g key={estado.sigla}>
+              <circle
+                cx={estado.x}
+                cy={estado.y}
+                r={isHovered ? radius + 3 : radius}
+                fill={isHovered ? 'rgba(14, 165, 233, 0.7)' : 'rgba(14, 165, 233, 0.5)'}
+                stroke={isHovered ? 'rgba(14, 165, 233, 1)' : 'rgba(14, 165, 233, 0.8)'}
+                strokeWidth={isHovered ? 3 : 2}
+                style={{ cursor: 'pointer', transition: 'all 0.15s' }}
+                onMouseEnter={(e) => {
+                  setHoveredSigla(estado.sigla);
+                  setTooltip({ sigla: estado.sigla, x: e.clientX, y: e.clientY });
+                }}
+                onMouseLeave={() => {
+                  setHoveredSigla(null);
+                  setTooltip(null);
+                }}
+                onMouseMove={(e) => {
+                  setTooltip({ sigla: estado.sigla, x: e.clientX, y: e.clientY });
+                }}
+              />
+              <text
+                x={estado.x}
+                y={estado.y - radius - 5}
+                textAnchor="middle"
+                fill="#1e293b"
+                fontSize={10}
+                fontWeight={600}
+                style={{ pointerEvents: 'none', userSelect: 'none' }}
+              >
+                {estado.sigla}
+              </text>
+              {isHovered && (
                 <text
+                  x={estado.x}
+                  y={estado.y + 4}
                   textAnchor="middle"
-                  y={-radius - 6}
-                  style={{ fontSize: 9, fontWeight: 600, fill: '#1e293b', pointerEvents: 'none' }}
+                  fill="#fff"
+                  fontSize={10}
+                  fontWeight={700}
+                  style={{ pointerEvents: 'none', userSelect: 'none' }}
                 >
-                  {estado.sigla}
+                  {formatCurrency(valor)}
                 </text>
-              </Marker>
-            );
-          })}
-        </ZoomableGroup>
-      </ComposableMap>
+              )}
+            </g>
+          );
+        })}
+
+        {estadosComDados.length === 0 && (
+          <text x={350} y={400} textAnchor="middle" fill="#94a3b8" fontSize={14}>
+            Nenhum dado disponível
+          </text>
+        )}
+      </svg>
 
       {tooltip && (
         <div
           className="pointer-events-none fixed z-50 rounded-lg border border-gray-200 bg-white px-3 py-2 text-xs shadow-lg dark:border-gray-700 dark:bg-gray-800"
-          style={{ left: tooltip.x + 12, top: tooltip.y - 40 }}
+          style={{ left: tooltip.x + 12, top: tooltip.y - 44 }}
         >
           <p className="font-semibold text-gray-900 dark:text-white">
-            {ESTADO_NAMES[tooltip.sigla] || tooltip.sigla} ({tooltip.sigla})
+            {ESTADOS.find((e) => e.sigla === tooltip.sigla)?.nome || tooltip.sigla} ({tooltip.sigla})
           </p>
           <p className="text-gray-600 dark:text-gray-400">
             Total investido: {formatCurrency(valorMap.get(tooltip.sigla) || 0)}

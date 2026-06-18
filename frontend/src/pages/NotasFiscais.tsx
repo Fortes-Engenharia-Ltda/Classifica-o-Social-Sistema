@@ -898,16 +898,16 @@ export const NotasFiscais: React.FC = () => {
       const fks: Record<string, number | null> = {};
 
       const prog = String(form.programa || '').trim().toLowerCase();
-      fks.programaId = (prog && programaMapId.get(prog)) ?? null;
+      fks.programaId = prog ? (programaMapId.get(prog) ?? null) : null;
 
       const proj = String(form.projeto || '').trim().toLowerCase();
-      fks.projetoId = (proj && projetoMapId.get(proj)) ?? null;
+      fks.projetoId = proj ? (projetoMapId.get(proj) ?? null) : null;
 
       const classif = String(form.classificacaoProjetoAtt || '').trim().toLowerCase();
-      fks.classificacaoAttId = (classif && classificacaoMapId.get(classif)) ?? null;
+      fks.classificacaoAttId = classif ? (classificacaoMapId.get(classif) ?? null) : null;
 
       const inst = String(form.instituicao || '').trim().toLowerCase();
-      fks.instituicaoId = (inst && instituicaoMapId.get(inst)) ?? null;
+      fks.instituicaoId = inst ? (instituicaoMapId.get(inst) ?? null) : null;
 
       if (form.orcadoNaoOrcado === 'ORCADO') fks.orcadoNaoOrcadoId = 1;
       else if (form.orcadoNaoOrcado === 'NAO_ORCADO') fks.orcadoNaoOrcadoId = 2;
@@ -1100,14 +1100,18 @@ export const NotasFiscais: React.FC = () => {
 
     try {
       const response = await NotaFiscalService.importarExcel(file);
+      const result = response?.data || response;
       alert(
-        `Importação concluída (modelo padrão). Total: ${response.data.totalLinhas}, importadas: ${response.data.importadas}, ignoradas: ${response.data.ignoradas}`,
+        `Importação concluída. Total: ${result.totalLinhas}, importadas: ${result.importadas}, ignoradas: ${result.ignoradas}`,
       );
       refetch();
-    } catch (error) {
-      // eslint-disable-next-line no-console
-      console.error('Erro na importação:', error);
-      alert('Não foi possível importar o Excel. Verifique o formato da planilha.');
+    } catch (error: any) {
+      const message =
+        error?.response?.data?.message ||
+        error?.response?.data?.erro ||
+        error?.message ||
+        'Erro desconhecido';
+      alert(`Erro ao importar: ${message}`);
     } finally {
       if (fileInputRef.current) {
         fileInputRef.current.value = '';

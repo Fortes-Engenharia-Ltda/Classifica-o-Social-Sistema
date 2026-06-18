@@ -1,0 +1,28 @@
+services:
+  - type: web
+    name: classificacao-social-backend
+    env: node
+    region: oregon
+    plan: free
+    buildCommand: npm install --legacy-peer-deps && npx prisma generate && npm run build
+    startCommand: npm run start:prod
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: '3001'
+      - key: DATABASE_URL
+        sync: false
+      - key: DIRECT_URL
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true
+      - key: JWT_EXPIRES_IN
+        value: 7d
+      - key: FRONTEND_URL
+        value: https://fortes-engenharia-ltda.github.io/Classifica-o-Social-Sistema
+      - key: LOG_LEVEL
+        value: info
+      - key: UPLOAD_DIR
+        value: ./uploads
