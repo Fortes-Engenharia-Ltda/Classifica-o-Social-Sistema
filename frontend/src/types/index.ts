@@ -150,6 +150,7 @@ export interface Metricas {
   totalValorNaoOrcado?: number;
   alertasAtivos: number;
   totalInstituicoes: number;
+  totalProjetos: number;
   totalObras: number;
   obrasAtivas: number;
   obrasInativas: number;
@@ -161,6 +162,8 @@ export interface Metricas {
   distribuicaoPorOrcado?: Array<{ name: string; value: number }>;
   distribuicaoPorLocalizacao?: Array<{ name: string; value: number }>;
   distribuicaoPorRegiao?: Array<{ name: string; value: number }>;
+  distribuicaoPorEstado?: Array<{ name: string; value: number }>;
+  valoresPorEstado?: Array<{ name: string; value: number }>;
   curvaPrevistoRealizadoProjetos?: Array<{ projeto: string; previsto: number; realizado: number }>;
   curvaPrevistoRealizadoMensalProjetos?: {
     competencias: string[];

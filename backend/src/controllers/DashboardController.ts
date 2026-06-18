@@ -464,6 +464,8 @@ export class DashboardController {
           const nfPorRegiaoMap = new Map<string, number>();
           const valorPorOrcadoMap = new Map<string, number>();
           const valorPorLocalizacaoMap = new Map<string, number>();
+          const nfPorEstadoMap = new Map<string, number>();
+          const valorPorEstadoMap = new Map<string, number>();
 
           for (const nf of notasFiltradas) {
             const metadata = parseNotaFiscalMetadata(nf.observacao);
@@ -513,6 +515,11 @@ export class DashboardController {
               ?? this.getRegiao(nf.obra?.un)
               ?? 'Não classificado';
             nfPorRegiaoMap.set(regiao, (nfPorRegiaoMap.get(regiao) || 0) + 1);
+
+            const estadoMatch = String(nf.obra?.local || nf.obra?.cidade || nf.obra?.un || '').trim().toUpperCase().match(/\b([A-Z]{2})\b$/);
+            const estado = estadoMatch ? estadoMatch[1] : 'N/D';
+            nfPorEstadoMap.set(estado, (nfPorEstadoMap.get(estado) || 0) + 1);
+            valorPorEstadoMap.set(estado, (valorPorEstadoMap.get(estado) || 0) + valorNF);
           }
 
           const projetosCurva = projetosResumo
@@ -559,6 +566,13 @@ export class DashboardController {
               distribuicaoPorRegiao: Array.from(nfPorRegiaoMap.entries())
                 .map(([name, value]) => ({ name, value }))
                 .sort((a, b) => b.value - a.value),
+              distribuicaoPorEstado: Array.from(nfPorEstadoMap.entries())
+                .map(([name, value]) => ({ name, value }))
+                .sort((a, b) => b.value - a.value),
+              valoresPorEstado: Array.from(valorPorEstadoMap.entries())
+                .map(([name, value]) => ({ name, value: Number(value.toFixed(2)) }))
+                .sort((a, b) => b.value - a.value),
+              totalProjetos: projetosResumo.length,
               valorPrevistoProjetos,
               valorRealizadoProjetos,
               totalPessoasImpactadas,
@@ -653,11 +667,14 @@ export class DashboardController {
               obrasInativas: 0,
               valorPrevistoProjetos: 0,
               valorRealizadoProjetos: 0,
+              totalProjetos: 0,
               totalPessoasImpactadas: 0,
               distribuicaoPorPrograma: [],
               distribuicaoPorClassificacao: [],
               distribuicaoPorOrcado: [],
               distribuicaoPorRegiao: [],
+              distribuicaoPorEstado: [],
+              valoresPorEstado: [],
               distribuicaoPorLocalizacao: Array.from(nfPorLocalizacaoMap.entries())
                 .map(([name, value]) => ({ name, value }))
                 .sort((a, b) => b.value - a.value),

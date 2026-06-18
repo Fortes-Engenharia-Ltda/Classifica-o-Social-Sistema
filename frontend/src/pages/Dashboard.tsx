@@ -385,10 +385,6 @@ export const Dashboard: React.FC = () => {
     () => buildCombinedChartData(distribuicaoLocalizacao, valoresPorLocalizacao, 'quantidade'),
     [distribuicaoLocalizacao, valoresPorLocalizacao],
   );
-  const regiaoChartData = useMemo(
-    () => (metricasData.distribuicaoPorRegiao || []).slice().sort((a: any, b: any) => b.value - a.value),
-    [metricasData.distribuicaoPorRegiao],
-  );
 
   const renderBarTooltip = ({ active, payload, label }: any) => {
     if (!active || !payload || !payload.length) {
@@ -755,14 +751,14 @@ export const Dashboard: React.FC = () => {
         </div>
 
         <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5 lg:grid-cols-4 lg:gap-6">
-          <StatCard label="NFs Pendentes para Analisar" value={metricasData.nfPendentes || 0} icon="📋" color="border-red-500" compact={dashboardCompactMode} />
-          <StatCard label="NFs Classificadas" value={metricasData.nfClassificadas || 0} icon="✅" color="border-blue-500" compact={dashboardCompactMode} />
-          <StatCard label="Valor Orçado" value={formatCurrency(metricasData.totalValorOrcado || 0)} icon="💼" color="border-emerald-500" compact={dashboardCompactMode} />
-          <StatCard label="Valor Não Orçado" value={formatCurrency(metricasData.totalValorNaoOrcado || 0)} icon="🧾" color="border-amber-500" compact={dashboardCompactMode} />
-          <StatCard label="Valor Previsto Projetos" value={formatCurrency(metricasData.valorPrevistoProjetos || 0)} icon="📈" color="border-purple-500" compact={dashboardCompactMode} />
+          <StatCard label="Pendência de Classificação" value={metricasData.nfComPendenciaClassificacao || 0} icon="⚠️" color="border-red-500" compact={dashboardCompactMode} />
+          <StatCard label="Valor Total Orçado" value={formatCurrency(metricasData.totalValorOrcado || 0)} icon="💼" color="border-emerald-500" compact={dashboardCompactMode} />
+          <StatCard label="Valor Total Não Orçado" value={formatCurrency(metricasData.totalValorNaoOrcado || 0)} icon="🧾" color="border-amber-500" compact={dashboardCompactMode} />
+          <StatCard label="Valor Total de NFs" value={formatCurrency(metricasData.totalValor || 0)} icon="💰" color="border-blue-500" compact={dashboardCompactMode} />
           <StatCard label="Instituições" value={metricasData.totalInstituicoes || 0} icon="🏢" color="border-indigo-500" compact={dashboardCompactMode} />
           <StatCard label="Obras Ativas" value={metricasData.obrasAtivas || 0} icon="🏗️" color="border-cyan-500" compact={dashboardCompactMode} />
-          <StatCard label="Valor Total de NFs" value={formatCurrency(metricasData.totalValor || 0)} icon="💰" color="border-blue-500" compact={dashboardCompactMode} />
+          <StatCard label="Valor Previsto Projetos" value={formatCurrency(metricasData.valorPrevistoProjetos || 0)} icon="📈" color="border-purple-500" compact={dashboardCompactMode} />
+          <StatCard label="Total Pessoas Impactadas" value={(metricasData.totalPessoasImpactadas || 0).toLocaleString('pt-BR')} icon="👥" color="border-orange-500" compact={dashboardCompactMode} />
         </div>
 
         <div className="mb-8 grid grid-cols-1 gap-6 lg:grid-cols-3">
@@ -803,24 +799,7 @@ export const Dashboard: React.FC = () => {
             </ResponsiveContainer>
           </div>
 
-          <div className="rounded-lg bg-white p-6 shadow-sm dark:bg-gray-800 lg:col-span-2">
-            <h3 className="mb-4 text-lg font-semibold text-gray-900 dark:text-white">Classificação por Região Geográfica</h3>
-            {regiaoChartData.length > 0 ? (
-              <ResponsiveContainer width="100%" height={320}>
-                <BarChart data={regiaoChartData} layout="vertical">
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis type="number" />
-                  <YAxis type="category" dataKey="name" width={120} tick={{ fontSize: 12 }} />
-                  <Tooltip formatter={(value: number) => value.toLocaleString('pt-BR')} labelFormatter={(label) => `Região: ${label}`} />
-                  <Legend />
-                  <Bar dataKey="value" fill="#0891b2" name="Quantidade NFs" radius={[0, 4, 4, 0]} />
-                </BarChart>
-              </ResponsiveContainer>
-            ) : (
-              <div className="flex h-80 items-center justify-center text-sm text-gray-400">Nenhum dado de região disponível</div>
-            )}
-          </div>
-          <div className="rounded-lg bg-white p-6 shadow-sm dark:bg-gray-800">
+          <div className="rounded-lg bg-white p-6 shadow-sm dark:bg-gray-800 lg:col-span-3">
             <h3 className="mb-4 text-lg font-semibold text-gray-900 dark:text-white">Quantidade por Localização</h3>
             <ResponsiveContainer width="100%" height={320}>
               <BarChart data={localizacaoChartData}>
