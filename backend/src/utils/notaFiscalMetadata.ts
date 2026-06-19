@@ -15,7 +15,9 @@ export interface CamposOpcionaisClassificacao {
   valor?: number | null;
   codDocumento?: string | null;
   observacoes?: string | null;
+  publicoAlvo?: string | null;
 }
+
 
 export interface NotaFiscalMetadata {
   camposObrigatorios: CamposObrigatoriosClassificacao;

@@ -12,7 +12,7 @@ export class ProgramaService {
   }
 
   async create(data: CreateProgramaDTO) {
-    const payload: CreateProgramaDTO = {
+    const payload = {
       ...data,
       codigo: data.codigo?.trim() || this.gerarCodigoAutomatico(),
     };
