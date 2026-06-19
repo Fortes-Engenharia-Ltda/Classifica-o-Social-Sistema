@@ -4,9 +4,11 @@ import { CreateProgramaDTO, UpdateProgramaDTO, ProgramaResponseDTO } from '../dt
 
 export class ProgramaRepository {
   async create(data: CreateProgramaDTO): Promise<ProgramaResponseDTO> {
+    const codigoGerado = data.codigo || `PRG-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+
     const programa = await prisma.programa.create({
       data: {
-        codigo: data.codigo,
+        codigo: codigoGerado,
         nome: data.nome,
         descricao: data.descricao,
         status: data.status ?? true,

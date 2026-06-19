@@ -4,17 +4,10 @@ import { CreateProgramaDTO, UpdateProgramaDTO } from '../dtos/ProgramaDTO';
 export class ProgramaService {
   private programaRepository = new ProgramaRepository();
 
-  private gerarCodigoAutomatico(): string {
-    const sufixoAleatorio = Math.floor(Math.random() * 1000)
-      .toString()
-      .padStart(3, '0');
-    return `PRG-${Date.now()}-${sufixoAleatorio}`;
-  }
-
   async create(data: CreateProgramaDTO) {
     const payload = {
       ...data,
-      codigo: data.codigo?.trim() || this.gerarCodigoAutomatico(),
+      codigo: data.codigo?.trim(),
     };
 
     return this.programaRepository.create(payload);
