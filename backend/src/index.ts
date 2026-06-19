@@ -13,7 +13,21 @@ const app = express();
 
 // Middlewares de segurança
 app.use(helmet());
-app.use(cors({ origin: config.server.frontendUrl, credentials: true }));
+const allowedOrigins = [
+  config.server.frontendUrl,
+  'https://classificacaosocial-fortes.vercel.app',
+].filter(Boolean);
+
+app.use(cors({
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true,
+}));
 
 // Middlewares de parser
 app.use(express.json());
