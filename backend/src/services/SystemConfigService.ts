@@ -173,20 +173,14 @@ export class SystemConfigService {
   }
 
   getSmtpSettings() {
-    const host = process.env.SMTP_HOST || config.email.host;
-    const port = Number(process.env.SMTP_PORT || config.email.port || 587);
-    const secure = String(process.env.SMTP_SECURE ?? config.email.secure) === 'true';
-    const user = process.env.SMTP_USER || config.email.user;
-    const pass = process.env.SMTP_PASS || config.email.pass;
-    const from = process.env.SMTP_FROM || config.email.from;
-
+    const cfg = config.email;
     return {
-      host,
-      port,
-      secure,
-      user,
-      from,
-      hasPassword: Boolean(pass),
+      host: cfg.host,
+      port: cfg.port,
+      secure: cfg.secure,
+      user: cfg.user,
+      from: cfg.from,
+      hasPassword: Boolean(cfg.pass),
     };
   }
 
@@ -214,19 +208,21 @@ export class SystemConfigService {
       process.env.SMTP_PASS = updatedValues.SMTP_PASS;
     }
 
-    config.email.host = process.env.SMTP_HOST || config.email.host;
-    config.email.port = Number(process.env.SMTP_PORT || config.email.port || 587);
-    config.email.secure = String(process.env.SMTP_SECURE ?? config.email.secure) === 'true';
-    config.email.user = process.env.SMTP_USER || config.email.user;
-    config.email.pass = process.env.SMTP_PASS || config.email.pass;
-    config.email.from = process.env.SMTP_FROM || config.email.from;
+    config.email.host = updatedValues.SMTP_HOST || config.email.host;
+    config.email.port = Number(updatedValues.SMTP_PORT || config.email.port || 587);
+    config.email.secure = updatedValues.SMTP_SECURE === 'true';
+    config.email.user = updatedValues.SMTP_USER || config.email.user;
+    config.email.from = updatedValues.SMTP_FROM || config.email.from;
+    if (updatedValues.SMTP_PASS) {
+      config.email.pass = updatedValues.SMTP_PASS;
+    }
 
     return this.getSmtpSettings();
   }
 
   async sendTestEmail(input: SendTestEmailInput): Promise<void> {
     const settings = this.getSmtpSettings();
-    const smtpPass = process.env.SMTP_PASS || config.email.pass;
+    const smtpPass = config.email.pass;
 
     if (!settings.host || !settings.user || !smtpPass || !settings.from) {
       throw new Error('Configuração SMTP incompleta. Preencha host, usuário, senha e remetente.');

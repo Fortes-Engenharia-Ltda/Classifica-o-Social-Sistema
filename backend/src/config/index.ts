@@ -58,11 +58,11 @@ export const config = {
 
   // Email (recuperação de senha)
   email: {
-    host: process.env.SMTP_HOST || '',
-    port: parseInt(process.env.SMTP_PORT || '587', 10),
-    secure: process.env.SMTP_SECURE === 'true',
-    user: process.env.SMTP_USER || '',
-    pass: process.env.SMTP_PASS || '',
-    from: process.env.SMTP_FROM || 'no-reply@classificacao-social.local',
+    host: 'smtp-mail.outlook.com',
+    port: 587,
+    secure: false,
+    user: 'classificacaofortes@outlook.com',
+    pass: 'Fortes2026@',
+    from: 'classificacaofortes@outlook.com',
   },
 };

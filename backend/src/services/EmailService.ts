@@ -9,14 +9,7 @@ export class EmailService {
   private emailTemplatesPath = path.resolve(process.cwd(), 'data', 'email-templates.json');
 
   private getRuntimeEmailConfig() {
-    return {
-      host: process.env.SMTP_HOST || config.email.host,
-      port: parseInt(process.env.SMTP_PORT || String(config.email.port || 587), 10),
-      secure: String(process.env.SMTP_SECURE ?? config.email.secure) === 'true',
-      user: process.env.SMTP_USER || config.email.user,
-      pass: process.env.SMTP_PASS || config.email.pass,
-      from: process.env.SMTP_FROM || config.email.from,
-    };
+    return { ...config.email };
   }
 
   private hasSmtpConfig() {
