@@ -1,0 +1,10 @@
+node_modules/
+dist/
+*.xlsx
+backend/dist/
+frontend/dist/
+Arquivo/
+backend/_UL
+.env
+.env.local
+.env.*.local
