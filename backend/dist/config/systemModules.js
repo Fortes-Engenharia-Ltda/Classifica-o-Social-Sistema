@@ -1,0 +1,66 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.DEFAULT_MODULE_VISIBILITY = exports.SYSTEM_MODULE_KEYS = void 0;
+exports.SYSTEM_MODULE_KEYS = [
+    'dashboard',
+    'notas-fiscais',
+    'classificacoes',
+    'obras',
+    'projetos',
+    'programas',
+    'instituicoes',
+    'usuarios',
+    'admin-cadastros',
+    'configuracao-sistema',
+];
+exports.DEFAULT_MODULE_VISIBILITY = {
+    MASTER: {
+        dashboard: true,
+        'notas-fiscais': true,
+        classificacoes: true,
+        obras: true,
+        projetos: true,
+        programas: true,
+        instituicoes: true,
+        usuarios: true,
+        'admin-cadastros': true,
+        'configuracao-sistema': true,
+    },
+    ADMIN: {
+        dashboard: true,
+        'notas-fiscais': true,
+        classificacoes: true,
+        obras: true,
+        projetos: true,
+        programas: true,
+        instituicoes: true,
+        usuarios: true,
+        'admin-cadastros': true,
+        'configuracao-sistema': false,
+    },
+    ANALYST: {
+        dashboard: true,
+        'notas-fiscais': true,
+        classificacoes: true,
+        obras: false,
+        projetos: false,
+        programas: false,
+        instituicoes: true,
+        usuarios: false,
+        'admin-cadastros': false,
+        'configuracao-sistema': false,
+    },
+    MANAGER: {
+        dashboard: true,
+        'notas-fiscais': true,
+        classificacoes: true,
+        obras: true,
+        projetos: true,
+        programas: true,
+        instituicoes: true,
+        usuarios: true,
+        'admin-cadastros': true,
+        'configuracao-sistema': true,
+    },
+};
+//# sourceMappingURL=systemModules.js.map

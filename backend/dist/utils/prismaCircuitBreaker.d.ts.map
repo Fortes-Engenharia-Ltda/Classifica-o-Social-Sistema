@@ -1,0 +1,1 @@
+{"version":3,"file":"prismaCircuitBreaker.d.ts","sourceRoot":"","sources":["../../src/utils/prismaCircuitBreaker.ts"],"names":[],"mappings":"AAsBA,wBAAgB,kBAAkB,IAAI,OAAO,CAE5C;AAED,wBAAgB,qBAAqB,CAAC,KAAK,EAAE,OAAO,GAAG,IAAI,CAI1D;AAED,wBAAsB,qBAAqB,CAAC,CAAC,EAC3C,YAAY,EAAE,MAAM,OAAO,CAAC,CAAC,CAAC,EAC9B,cAAc,EAAE,MAAM,OAAO,CAAC,CAAC,CAAC,GAC/B,OAAO,CAAC,CAAC,CAAC,CAeZ"}

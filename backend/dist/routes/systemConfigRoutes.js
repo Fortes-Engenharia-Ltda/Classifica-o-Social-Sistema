@@ -1,0 +1,24 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const auth_1 = require("../middlewares/auth");
+const SystemConfigController_1 = require("../controllers/SystemConfigController");
+const router = (0, express_1.Router)();
+const controller = new SystemConfigController_1.SystemConfigController();
+router.use(auth_1.authMiddleware);
+router.get('/perfis', (0, auth_1.authorize)('MASTER', 'MANAGER'), (req, res) => controller.getPerfis(req, res));
+router.get('/modulos/me', (req, res) => controller.getVisibleModules(req, res));
+router.get('/modulos', (0, auth_1.authorize)('MASTER', 'MANAGER'), (req, res) => controller.getModulesConfig(req, res));
+router.post('/modulos/perfis', (0, auth_1.authorize)('MASTER', 'MANAGER'), (req, res) => controller.createModulesProfile(req, res));
+router.delete('/modulos/perfis/:perfil', (0, auth_1.authorize)('MASTER', 'MANAGER'), (req, res) => controller.deleteModulesProfile(req, res));
+router.put('/modulos/:perfil', (0, auth_1.authorize)('MASTER', 'MANAGER'), (req, res) => controller.updateModulesConfig(req, res));
+router.get('/sqlserver', (0, auth_1.authorize)('MASTER', 'MANAGER'), (req, res) => controller.getSqlServerConfig(req, res));
+router.put('/sqlserver', (0, auth_1.authorize)('MASTER', 'MANAGER'), (req, res) => controller.updateSqlServerConfig(req, res));
+router.get('/smtp', (0, auth_1.authorize)('MASTER', 'MANAGER'), (req, res) => controller.getSmtpConfig(req, res));
+router.put('/smtp', (0, auth_1.authorize)('MASTER', 'MANAGER'), (req, res) => controller.updateSmtpConfig(req, res));
+router.post('/smtp/testar', (0, auth_1.authorize)('MASTER', 'MANAGER'), (req, res) => controller.testSmtpConfig(req, res));
+router.get('/email-templates', (0, auth_1.authorize)('MASTER', 'MANAGER'), (req, res) => controller.getEmailTemplates(req, res));
+router.put('/email-templates/:tipo', (0, auth_1.authorize)('MASTER', 'MANAGER'), (req, res) => controller.updateEmailTemplate(req, res));
+router.post('/email-templates/:tipo/restaurar', (0, auth_1.authorize)('MASTER', 'MANAGER'), (req, res) => controller.restoreEmailTemplate(req, res));
+exports.default = router;
+//# sourceMappingURL=systemConfigRoutes.js.map
