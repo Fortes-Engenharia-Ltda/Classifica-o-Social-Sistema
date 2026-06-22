@@ -111,7 +111,6 @@ export const Projetos: React.FC = () => {
   const [pageSize] = useState(50);
   const [showModal, setShowModal] = useState(false);
   const [showViewModal, setShowViewModal] = useState(false);
-  const [showImageLightbox, setShowImageLightbox] = useState(false);
   const [showDistribuicaoModal, setShowDistribuicaoModal] = useState(false);
   const [selectedProjeto, setSelectedProjeto] = useState<Projeto | null>(null);
   const [instituicoesPorProjeto, setInstituicoesPorProjeto] = useState<any[]>([]);
@@ -142,10 +141,6 @@ export const Projetos: React.FC = () => {
   const [viewMode, setViewMode] = useState<'cards' | 'table'>('cards');
   const [distribuicaoEditavel, setDistribuicaoEditavel] = useState<DistribuicaoEditavelItem[]>([]);
   const [errorMessage, setErrorMessage] = useState('');
-  const [tipoImagem, setTipoImagem] = useState<'url' | 'arquivo'>('url');
-  const [uploadArquivo, setUploadArquivo] = useState<File | null>(null);
-  const [uploadPreview, setUploadPreview] = useState<string>('');
-  const [enviandoImagem, setEnviandoImagem] = useState(false);
   const [formData, setFormData] = useState({
     nome: '',
     descricao: '',
@@ -157,7 +152,6 @@ export const Projetos: React.FC = () => {
     quantidadePessoasCadastradas: 0,
     valorMonetarioPrevisto: '',
     valorMonetarioRealizado: 0,
-    imagem: '',
     status: true,
     impactoMensal: [] as ImpactoMensalProjeto[],
     participantesProjeto: [] as ParticipanteProjeto[],
@@ -176,21 +170,10 @@ export const Projetos: React.FC = () => {
       quantidadePessoasCadastradas: projeto.quantidadePessoasCadastradas || 0,
       valorMonetarioPrevisto: projeto.valorMonetarioPrevisto?.toString().replace('.', ',') || '',
       valorMonetarioRealizado: projeto.valorMonetarioRealizado || 0,
-      imagem: projeto.imagem || '',
       status: projeto.status,
       impactoMensal: projeto.impactoMensal || [],
       participantesProjeto: projeto.participantesProjeto || [],
     });
-    // Se a imagem salva é de upload (caminho relativo) ou URL externa
-    if (projeto.imagem && !projeto.imagem.startsWith('http')) {
-      setTipoImagem('arquivo');
-      setUploadPreview(projeto.imagem);
-      setUploadArquivo(null);
-    } else {
-      setTipoImagem('url');
-      setUploadArquivo(null);
-      setUploadPreview('');
-    }
     setEditId(projeto.id);
     setShowModal(true);
   };
@@ -245,12 +228,6 @@ export const Projetos: React.FC = () => {
       setInstituicoesPorProjeto(data);
     }).catch(() => setInstituicoesPorProjeto([]));
   };
-
-  const imagemProjetoSelecionado = selectedProjeto?.imagem
-    ? selectedProjeto.imagem.startsWith('http')
-      ? selectedProjeto.imagem
-      : `${import.meta.env.VITE_API_URL || ''}${selectedProjeto.imagem}`
-    : '';
 
   const impactoMensalProjetoSelecionado = selectedProjeto?.impactoMensal || [];
   const totalPessoasDiretas = impactoMensalProjetoSelecionado.reduce(
@@ -414,22 +391,6 @@ export const Projetos: React.FC = () => {
     }
 
     try {
-      let imagemFinal = formData.imagem;
-
-      // Se o usuário selecionou um arquivo, faz upload primeiro
-      if (tipoImagem === 'arquivo' && uploadArquivo) {
-        setEnviandoImagem(true);
-        try {
-          const resultado = await ProjetoService.uploadImagem(uploadArquivo);
-          imagemFinal = resultado.url;
-        } finally {
-          setEnviandoImagem(false);
-        }
-      } else if (tipoImagem === 'arquivo' && !uploadArquivo && uploadPreview) {
-        // Mantém o caminho do arquivo já enviado anteriormente
-        imagemFinal = formData.imagem;
-      }
-
       const { valorMonetarioRealizado, ...dadosParaEnviar } = formData;
       const dadosAEnviar = {
         ...dadosParaEnviar,
@@ -440,7 +401,6 @@ export const Projetos: React.FC = () => {
         impactoMensal: dadosParaEnviar.impactoMensal,
         participantesProjeto: dadosParaEnviar.participantesProjeto,
         valorMonetarioPrevisto: parseCurrency(dadosParaEnviar.valorMonetarioPrevisto),
-        imagem: imagemFinal || null,
       };
 
       if (editId) {
@@ -459,14 +419,10 @@ export const Projetos: React.FC = () => {
         quantidadePessoasCadastradas: 0,
         valorMonetarioPrevisto: '',
         valorMonetarioRealizado: 0,
-        imagem: '',
         status: true,
         impactoMensal: [],
         participantesProjeto: [],
       });
-      setTipoImagem('url');
-      setUploadArquivo(null);
-      setUploadPreview('');
       setEditId(null);
       setShowModal(false);
       refetch();
@@ -575,14 +531,10 @@ export const Projetos: React.FC = () => {
                 quantidadePessoasCadastradas: 0,
                 valorMonetarioPrevisto: '',
                 valorMonetarioRealizado: 0,
-                imagem: '',
                 status: true,
                 impactoMensal: [],
                 participantesProjeto: [],
               });
-              setTipoImagem('url');
-              setUploadArquivo(null);
-              setUploadPreview('');
               setShowModal(true);
             }}
             className="flex items-center space-x-2 bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-lg"
@@ -620,78 +572,6 @@ export const Projetos: React.FC = () => {
                   className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white"
                   required
                 />
-              </div>
-
-              {/* Imagem */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Imagem do Projeto <span className="text-xs text-gray-500">(opcional)</span>
-                </label>
-                {/* Toggle URL / Arquivo */}
-                <div className="flex rounded-lg border border-gray-300 dark:border-gray-600 mb-3 overflow-hidden w-fit">
-                  <button
-                    type="button"
-                    onClick={() => { setTipoImagem('url'); setUploadArquivo(null); setUploadPreview(''); }}
-                    className={`px-4 py-1.5 text-xs font-semibold transition ${tipoImagem === 'url' ? 'bg-primary-600 text-white' : 'bg-white dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600'}`}
-                  >
-                    Link (URL)
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => { setTipoImagem('arquivo'); setFormData(prev => ({ ...prev, imagem: '' })); }}
-                    className={`px-4 py-1.5 text-xs font-semibold transition ${tipoImagem === 'arquivo' ? 'bg-primary-600 text-white' : 'bg-white dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600'}`}
-                  >
-                    Arquivo
-                  </button>
-                </div>
-
-                {tipoImagem === 'url' ? (
-                  <>
-                    <input
-                      type="url"
-                      value={formData.imagem}
-                      onChange={(e) => setFormData({ ...formData, imagem: e.target.value })}
-                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white"
-                      placeholder="https://exemplo.com/imagem.jpg"
-                    />
-                    {formData.imagem && (
-                      <img
-                        src={formData.imagem}
-                        alt="Preview"
-                        className="mt-2 h-20 w-full rounded-lg object-cover"
-                        onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
-                      />
-                    )}
-                  </>
-                ) : (
-                  <>
-                    <input
-                      type="file"
-                      accept="image/jpeg,image/png,image/webp,image/gif"
-                      onChange={(e) => {
-                        const file = e.target.files?.[0] ?? null;
-                        setUploadArquivo(file);
-                        if (file) {
-                          const reader = new FileReader();
-                          reader.onload = (ev) => setUploadPreview(ev.target?.result as string);
-                          reader.readAsDataURL(file);
-                        } else {
-                          setUploadPreview('');
-                        }
-                      }}
-                      className="w-full text-sm text-gray-700 dark:text-gray-300 file:mr-3 file:rounded-lg file:border-0 file:bg-primary-50 file:px-3 file:py-1.5 file:text-xs file:font-semibold file:text-primary-700 hover:file:bg-primary-100"
-                    />
-                    <p className="text-xs text-gray-500 mt-1">JPG, PNG, WEBP ou GIF — máx. 5 MB</p>
-                    {(uploadPreview) && (
-                      <img
-                        src={uploadPreview.startsWith('data:') ? uploadPreview : `${import.meta.env.VITE_API_URL || ''}/uploads${uploadPreview.replace('/uploads', '')}`}
-                        alt="Preview"
-                        className="mt-2 h-20 w-full rounded-lg object-cover"
-                        onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
-                      />
-                    )}
-                  </>
-                )}
               </div>
 
               {/* Descrição */}
@@ -1035,10 +915,9 @@ export const Projetos: React.FC = () => {
               <div className="flex space-x-2 pt-2">
                 <button
                   type="submit"
-                  disabled={enviandoImagem}
                   className="flex-1 bg-primary-600 text-white py-2 rounded-lg hover:bg-primary-700 font-medium disabled:opacity-60"
                 >
-                  {enviandoImagem ? 'Enviando imagem...' : 'Salvar'}
+                  Salvar
                 </button>
                 <button
                   type="button"
@@ -1046,9 +925,6 @@ export const Projetos: React.FC = () => {
                     setShowModal(false);
                     setErrorMessage('');
                     setShowDistribuicaoModal(false);
-                    setTipoImagem('url');
-                    setUploadArquivo(null);
-                    setUploadPreview('');
                   }}
                   className="flex-1 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 py-2 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 font-medium"
                 >
@@ -1158,21 +1034,6 @@ export const Projetos: React.FC = () => {
                 </button>
               </div>
             </div>
-
-            {imagemProjetoSelecionado && (
-              <button
-                type="button"
-                onClick={() => setShowImageLightbox(true)}
-                className="mb-4 block w-full overflow-hidden rounded-lg border border-gray-200 dark:border-gray-700"
-                title="Clique para ampliar"
-              >
-                <img
-                  src={imagemProjetoSelecionado}
-                  alt={selectedProjeto.nome}
-                  className="h-auto max-h-[45vh] w-full object-contain bg-gray-50 dark:bg-gray-900"
-                />
-              </button>
-            )}
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
               <div className="rounded-lg bg-gray-50 dark:bg-gray-700/40 p-3">
@@ -1312,7 +1173,6 @@ export const Projetos: React.FC = () => {
                 type="button"
                 onClick={() => {
                   setShowViewModal(false);
-                  setShowImageLightbox(false);
                   setSelectedProjeto(null);
                 }}
                 className="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-100 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600"
@@ -1321,27 +1181,6 @@ export const Projetos: React.FC = () => {
               </button>
             </div>
           </div>
-        </div>
-      )}
-
-      {showImageLightbox && imagemProjetoSelecionado && (
-        <div
-          className="fixed inset-0 z-[60] bg-black/85 flex items-center justify-center p-4"
-          onClick={() => setShowImageLightbox(false)}
-        >
-          <button
-            type="button"
-            className="absolute top-4 right-4 p-1.5 rounded bg-white/20 text-white hover:bg-white/30"
-            onClick={() => setShowImageLightbox(false)}
-          >
-            <X size={20} />
-          </button>
-          <img
-            src={imagemProjetoSelecionado}
-            alt={selectedProjeto?.nome || 'Imagem do projeto'}
-            className="max-h-[90vh] max-w-[95vw] object-contain rounded"
-            onClick={(e) => e.stopPropagation()}
-          />
         </div>
       )}
 
@@ -1363,34 +1202,6 @@ export const Projetos: React.FC = () => {
               key={item.id}
               className="flex flex-col overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800"
             >
-            {/* Foto */}
-            {item.imagem ? (
-              <img
-                src={
-                  item.imagem.startsWith('http')
-                    ? item.imagem
-                    : `${import.meta.env.VITE_API_URL || ''}${item.imagem}`
-                }
-                alt={item.nome}
-                className="h-36 w-full object-cover"
-                onError={(e) => {
-                  const target = e.target as HTMLImageElement;
-                  console.warn(`[Projeto] Falha ao carregar imagem: ${target.src}`);
-                  target.style.display = 'none';
-                  const placeholder = target.nextElementSibling as HTMLElement | null;
-                  if (placeholder) placeholder.style.display = 'flex';
-                }}
-              />
-            ) : null}
-            <div
-              className={`h-36 w-full items-center justify-center bg-gradient-to-br from-primary-100 to-primary-200 dark:from-primary-900 dark:to-primary-800 ${item.imagem ? 'hidden' : 'flex'}`}
-            >
-              <svg className="h-14 w-14 text-primary-400 dark:text-primary-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 7a2 2 0 012-2h14a2 2 0 012 2v10a2 2 0 01-2 2H5a2 2 0 01-2-2V7z" />
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 12h8M8 16h5" />
-              </svg>
-            </div>
-
             <div className="flex flex-1 flex-col gap-3 p-4">
               {/* Título + status */}
               <div className="flex items-start justify-between gap-2">

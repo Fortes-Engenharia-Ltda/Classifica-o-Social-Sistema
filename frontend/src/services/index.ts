@@ -95,15 +95,6 @@ export class ProjetoService {
     return response.data;
   }
 
-  static async uploadImagem(arquivo: File): Promise<{ url: string }> {
-    const formData = new FormData();
-    formData.append('imagem', arquivo);
-    const response = await api.post('/projetos/upload-imagem', formData, {
-      headers: { 'Content-Type': 'multipart/form-data' },
-    });
-    return response.data?.data;
-  }
-
   static async listarInstituicoesPorProjeto(projetoId: number): Promise<any> {
     const response = await api.get(`/projetos/${projetoId}/instituicoes`);
     return response.data;
