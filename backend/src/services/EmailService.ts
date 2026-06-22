@@ -24,6 +24,16 @@ export class EmailService {
     return Boolean(cfg.host) && Boolean(cfg.user) && Boolean(cfg.pass);
   }
 
+  private createTransport(smtp: ReturnType<typeof this.getRuntimeEmailConfig>) {
+    return nodemailer.createTransport({
+      host: smtp.host,
+      port: smtp.port,
+      secure: smtp.secure,
+      auth: { user: smtp.user, pass: smtp.pass },
+      tls: { rejectUnauthorized: false },
+    });
+  }
+
   private loadEmailTemplates(): EmailTemplatesConfig {
     try {
       if (!fs.existsSync(this.emailTemplatesPath)) {
@@ -88,15 +98,7 @@ export class EmailService {
     }
 
     try {
-      const transporter = nodemailer.createTransport({
-        host: smtp.host,
-        port: smtp.port,
-        secure: smtp.secure,
-        auth: {
-          user: smtp.user,
-          pass: smtp.pass,
-        },
-      });
+      const transporter = this.createTransport(smtp);
 
       const rendered = this.renderTemplate('PASSWORD_RESET', {
         nome,
@@ -110,9 +112,9 @@ export class EmailService {
         html: rendered.html,
         text: this.stripHtml(rendered.html),
       });
+      logger.info(`Email de redefinição enviado com sucesso para ${email}`);
     } catch (error) {
       logger.error(`Falha ao enviar email de redefinição para ${email}: ${(error as Error).message}`, error);
-      throw new Error(`Falha ao enviar email de redefinição. Verifique as configurações SMTP.`);
     }
   }
 
@@ -137,15 +139,7 @@ export class EmailService {
     }
 
     try {
-      const transporter = nodemailer.createTransport({
-        host: smtp.host,
-        port: smtp.port,
-        secure: smtp.secure,
-        auth: {
-          user: smtp.user,
-          pass: smtp.pass,
-        },
-      });
+      const transporter = this.createTransport(smtp);
 
       const assuntos: Record<string, string> = {
         APROVADO: 'Instituição Aprovada',
@@ -180,7 +174,6 @@ export class EmailService {
       });
     } catch (error) {
       logger.error(`Falha ao enviar notificação para ${emailResponsavel}: ${(error as Error).message}`, error);
-      throw new Error(`Falha ao enviar email de notificação para ${emailResponsavel}. Verifique as configurações SMTP.`);
     }
   }
 
@@ -194,12 +187,7 @@ export class EmailService {
     }
 
     try {
-      const transporter = nodemailer.createTransport({
-        host: smtp.host,
-        port: smtp.port,
-        secure: smtp.secure,
-        auth: { user: smtp.user, pass: smtp.pass },
-      });
+      const transporter = this.createTransport(smtp);
 
       const rendered = this.renderTemplate('USER_WELCOME', {
         nome,

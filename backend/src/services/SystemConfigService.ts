@@ -243,6 +243,7 @@ export class SystemConfigService {
         user: settings.user,
         pass: smtpPass,
       },
+      tls: { rejectUnauthorized: false },
     });
 
     try {
