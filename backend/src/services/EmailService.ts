@@ -87,28 +87,33 @@ export class EmailService {
       return;
     }
 
-    const transporter = nodemailer.createTransport({
-      host: smtp.host,
-      port: smtp.port,
-      secure: smtp.secure,
-      auth: {
-        user: smtp.user,
-        pass: smtp.pass,
-      },
-    });
+    try {
+      const transporter = nodemailer.createTransport({
+        host: smtp.host,
+        port: smtp.port,
+        secure: smtp.secure,
+        auth: {
+          user: smtp.user,
+          pass: smtp.pass,
+        },
+      });
 
-    const rendered = this.renderTemplate('PASSWORD_RESET', {
-      nome,
-      codigo,
-    });
+      const rendered = this.renderTemplate('PASSWORD_RESET', {
+        nome,
+        codigo,
+      });
 
-    await transporter.sendMail({
-      from: smtp.from,
-      to: email,
-      subject: rendered.subject,
-      html: rendered.html,
-      text: this.stripHtml(rendered.html),
-    });
+      await transporter.sendMail({
+        from: smtp.from,
+        to: email,
+        subject: rendered.subject,
+        html: rendered.html,
+        text: this.stripHtml(rendered.html),
+      });
+    } catch (error) {
+      logger.error(`Falha ao enviar email de redefinição para ${email}: ${(error as Error).message}`, error);
+      throw new Error(`Falha ao enviar email de redefinição. Verifique as configurações SMTP.`);
+    }
   }
 
   async enviarNotificacaoStatusInstituicao(
@@ -131,47 +136,52 @@ export class EmailService {
       return;
     }
 
-    const transporter = nodemailer.createTransport({
-      host: smtp.host,
-      port: smtp.port,
-      secure: smtp.secure,
-      auth: {
-        user: smtp.user,
-        pass: smtp.pass,
-      },
-    });
+    try {
+      const transporter = nodemailer.createTransport({
+        host: smtp.host,
+        port: smtp.port,
+        secure: smtp.secure,
+        auth: {
+          user: smtp.user,
+          pass: smtp.pass,
+        },
+      });
 
-    const assuntos: Record<string, string> = {
-      APROVADO: 'Instituição Aprovada',
-      REJEITADO: 'Instituição Rejeitada',
-      AJUSTES_SOLICITADOS: 'Ajustes Solicitados',
-      PENDENTE: 'Cadastro Enviado para Validação',
-    };
+      const assuntos: Record<string, string> = {
+        APROVADO: 'Instituição Aprovada',
+        REJEITADO: 'Instituição Rejeitada',
+        AJUSTES_SOLICITADOS: 'Ajustes Solicitados',
+        PENDENTE: 'Cadastro Enviado para Validação',
+      };
 
-    const mensagens: Record<string, string> = {
-      APROVADO: `Parabéns! Sua instituição "${nomeInstituicao}" foi aprovada e está disponível no sistema.`,
-      REJEITADO: `Sua instituição "${nomeInstituicao}" foi rejeitada.${motivo ? ` Motivo: ${motivo}` : ''}`,
-      AJUSTES_SOLICITADOS: `Sua instituição "${nomeInstituicao}" requer ajustes.${motivo ? ` Detalhes: ${motivo}` : ''}${linkAjustes ? `\n\nAcesse o link abaixo para realizar os ajustes:\n${linkAjustes}` : ''}`,
-      PENDENTE: `Seu cadastro para "${nomeInstituicao}" foi enviado com sucesso. Aguarde a validação pela equipe Fortes Engenharia.`,
-    };
+      const mensagens: Record<string, string> = {
+        APROVADO: `Parabéns! Sua instituição "${nomeInstituicao}" foi aprovada e está disponível no sistema.`,
+        REJEITADO: `Sua instituição "${nomeInstituicao}" foi rejeitada.${motivo ? ` Motivo: ${motivo}` : ''}`,
+        AJUSTES_SOLICITADOS: `Sua instituição "${nomeInstituicao}" requer ajustes.${motivo ? ` Detalhes: ${motivo}` : ''}${linkAjustes ? `\n\nAcesse o link abaixo para realizar os ajustes:\n${linkAjustes}` : ''}`,
+        PENDENTE: `Seu cadastro para "${nomeInstituicao}" foi enviado com sucesso. Aguarde a validação pela equipe Fortes Engenharia.`,
+      };
 
-    const rendered = this.renderTemplate('INSTITUICAO_REVISAO', {
-      nomeResponsavel,
-      nomeInstituicao,
-      status,
-      statusTitulo: assuntos[status],
-      statusMensagem: mensagens[status],
-      motivo: motivo || '',
-      linkAjustes: linkAjustes || '',
-    });
+      const rendered = this.renderTemplate('INSTITUICAO_REVISAO', {
+        nomeResponsavel,
+        nomeInstituicao,
+        status,
+        statusTitulo: assuntos[status],
+        statusMensagem: mensagens[status],
+        motivo: motivo || '',
+        linkAjustes: linkAjustes || '',
+      });
 
-    await transporter.sendMail({
-      from: smtp.from,
-      to: emailResponsavel,
-      subject: rendered.subject,
-      html: rendered.html,
-      text: this.stripHtml(rendered.html),
-    });
+      await transporter.sendMail({
+        from: smtp.from,
+        to: emailResponsavel,
+        subject: rendered.subject,
+        html: rendered.html,
+        text: this.stripHtml(rendered.html),
+      });
+    } catch (error) {
+      logger.error(`Falha ao enviar notificação para ${emailResponsavel}: ${(error as Error).message}`, error);
+      throw new Error(`Falha ao enviar email de notificação para ${emailResponsavel}. Verifique as configurações SMTP.`);
+    }
   }
 
   async enviarBoasVindasUsuario(email: string, nome: string, senhaInicial: string): Promise<void> {
@@ -183,25 +193,29 @@ export class EmailService {
       return;
     }
 
-    const transporter = nodemailer.createTransport({
-      host: smtp.host,
-      port: smtp.port,
-      secure: smtp.secure,
-      auth: { user: smtp.user, pass: smtp.pass },
-    });
+    try {
+      const transporter = nodemailer.createTransport({
+        host: smtp.host,
+        port: smtp.port,
+        secure: smtp.secure,
+        auth: { user: smtp.user, pass: smtp.pass },
+      });
 
-    const rendered = this.renderTemplate('USER_WELCOME', {
-      nome,
-      email,
-      senhaInicial,
-    });
+      const rendered = this.renderTemplate('USER_WELCOME', {
+        nome,
+        email,
+        senhaInicial,
+      });
 
-    await transporter.sendMail({
-      from: smtp.from,
-      to: email,
-      subject: rendered.subject,
-      html: rendered.html,
-      text: this.stripHtml(rendered.html),
-    });
+      await transporter.sendMail({
+        from: smtp.from,
+        to: email,
+        subject: rendered.subject,
+        html: rendered.html,
+        text: this.stripHtml(rendered.html),
+      });
+    } catch (error) {
+      logger.error(`Falha ao enviar email de boas-vindas para ${email}: ${(error as Error).message}`, error);
+    }
   }
 }
