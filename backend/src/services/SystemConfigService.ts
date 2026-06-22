@@ -9,6 +9,7 @@ import {
   SystemModuleKey,
 } from '../config/systemModules';
 import { config } from '../config';
+import logger from '../config/logger';
 import {
   DEFAULT_EMAIL_TEMPLATES,
   EMAIL_TEMPLATE_LABELS,
@@ -228,6 +229,8 @@ export class SystemConfigService {
     const settings = this.getSmtpSettings();
     const smtpPass = process.env.SMTP_PASS || config.email.pass;
 
+    logger.info(`Tentando enviar email de teste para ${input.to} com SMTP: host=${settings.host}, port=${settings.port}, secure=${settings.secure}, user=${settings.user}, from=${settings.from}, hasPass=${Boolean(smtpPass)}`);
+
     if (!settings.host || !settings.user || !smtpPass || !settings.from) {
       throw new Error('Configuração SMTP incompleta. Preencha host, usuário, senha e remetente.');
     }
@@ -242,12 +245,18 @@ export class SystemConfigService {
       },
     });
 
-    await transporter.sendMail({
-      from: settings.from,
-      to: input.to,
-      subject: 'Teste de SMTP - Classificação Social',
-      text: 'Seu SMTP foi configurado com sucesso no sistema Classificação Social.',
-    });
+    try {
+      await transporter.sendMail({
+        from: settings.from,
+        to: input.to,
+        subject: 'Teste de SMTP - Classificação Social',
+        text: 'Seu SMTP foi configurado com sucesso no sistema Classificação Social.',
+      });
+      logger.info(`Email de teste enviado com sucesso para ${input.to}`);
+    } catch (error) {
+      logger.error(`Falha ao enviar email de teste para ${input.to}: ${(error as Error).message}`, error);
+      throw new Error(`Falha ao enviar email: ${(error as Error).message}`);
+    }
   }
 
   getEmailTemplates(): { labels: Record<EmailTemplateType, string>; templates: EmailTemplatesConfig } {
