@@ -21,7 +21,8 @@ export const Login: React.FC = () => {
   const [novaSenha, setNovaSenha] = useState('');
   const [loadingForgot, setLoadingForgot] = useState(false);
   const [loadingReset, setLoadingReset] = useState(false);
-  const codigoInformado = codigo.trim().length >= 6;
+  const codigoTrimmed = codigo.trim();
+  const codigoInformado = codigoTrimmed.length >= 6;
 
   const abrirModalEsqueciSenha = () => {
     setShowForgotPasswordModal(true);
@@ -90,10 +91,16 @@ export const Login: React.FC = () => {
       return;
     }
 
+    if (!novaSenha || novaSenha.length < 6) {
+      setError('A nova senha deve ter pelo menos 6 caracteres');
+      setLoadingReset(false);
+      return;
+    }
+
     try {
       const response = await UsuarioService.resetPassword({
         email: forgotEmail,
-        codigo,
+        codigo: codigoTrimmed,
         novaSenha,
       });
       setSuccess(response.message || 'Senha redefinida com sucesso. Faça login novamente.');

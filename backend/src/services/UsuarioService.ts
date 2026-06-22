@@ -265,16 +265,12 @@ export class UsuarioService {
     const codigo = `${Math.floor(100000 + Math.random() * 900000)}`;
     const expiraEm = new Date(Date.now() + 15 * 60 * 1000);
 
+    await this.emailService.enviarCodigoRedefinicao(usuario.email, usuario.nome, codigo);
+
     await runWithPrismaFallback(
       async () => this.usuarioRepository.updateResetCode(data.email, codigo, expiraEm),
       async () => this.updateResetCodeLocal(data.email, codigo, expiraEm),
     );
-
-    try {
-      await this.emailService.enviarCodigoRedefinicao(usuario.email, usuario.nome, codigo);
-    } catch (error) {
-      logger.error(`Falha ao enviar código de redefinição para ${data.email}: ${(error as Error).message}`, error);
-    }
   }
 
   async resetPassword(data: ResetPasswordDTO): Promise<void> {
@@ -282,7 +278,8 @@ export class UsuarioService {
       throw new Error('Email inválido');
     }
 
-    if (!data.codigo || data.codigo.length < 6) {
+    const codigoLimpo = String(data.codigo || '').trim();
+    if (!codigoLimpo || codigoLimpo.length < 6) {
       throw new Error('Código inválido');
     }
 
@@ -303,7 +300,7 @@ export class UsuarioService {
       throw new Error('Solicite um novo código de redefinição');
     }
 
-    if (usuario.codigoResetSenha !== data.codigo) {
+    if (usuario.codigoResetSenha !== codigoLimpo) {
       throw new Error('Código inválido');
     }
 

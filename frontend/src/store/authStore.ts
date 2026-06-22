@@ -10,8 +10,17 @@ interface AuthStore {
   isAuthenticated: () => boolean;
 }
 
+function loadUsuario(): Usuario | null {
+  try {
+    const saved = localStorage.getItem('usuario');
+    return saved ? JSON.parse(saved) : null;
+  } catch {
+    return null;
+  }
+}
+
 export const useAuthStore = create<AuthStore>((set, get) => ({
-  usuario: null,
+  usuario: loadUsuario(),
   token: localStorage.getItem('token'),
 
   setUsuario: (usuario) => {

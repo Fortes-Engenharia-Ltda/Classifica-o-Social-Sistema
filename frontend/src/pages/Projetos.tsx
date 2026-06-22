@@ -1375,6 +1375,7 @@ export const Projetos: React.FC = () => {
                 className="h-36 w-full object-cover"
                 onError={(e) => {
                   const target = e.target as HTMLImageElement;
+                  console.warn(`[Projeto] Falha ao carregar imagem: ${target.src}`);
                   target.style.display = 'none';
                   const placeholder = target.nextElementSibling as HTMLElement | null;
                   if (placeholder) placeholder.style.display = 'flex';
