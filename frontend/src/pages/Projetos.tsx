@@ -152,6 +152,7 @@ export const Projetos: React.FC = () => {
     quantidadePessoasCadastradas: 0,
     valorMonetarioPrevisto: '',
     valorMonetarioRealizado: 0,
+    imagem: '',
     status: true,
     impactoMensal: [] as ImpactoMensalProjeto[],
     participantesProjeto: [] as ParticipanteProjeto[],
@@ -170,6 +171,7 @@ export const Projetos: React.FC = () => {
       quantidadePessoasCadastradas: projeto.quantidadePessoasCadastradas || 0,
       valorMonetarioPrevisto: projeto.valorMonetarioPrevisto?.toString().replace('.', ',') || '',
       valorMonetarioRealizado: projeto.valorMonetarioRealizado || 0,
+      imagem: projeto.imagem || '',
       status: projeto.status,
       impactoMensal: projeto.impactoMensal || [],
       participantesProjeto: projeto.participantesProjeto || [],
@@ -401,6 +403,7 @@ export const Projetos: React.FC = () => {
         impactoMensal: dadosParaEnviar.impactoMensal,
         participantesProjeto: dadosParaEnviar.participantesProjeto,
         valorMonetarioPrevisto: parseCurrency(dadosParaEnviar.valorMonetarioPrevisto),
+        imagem: formData.imagem || null,
       };
 
       if (editId) {
@@ -419,6 +422,7 @@ export const Projetos: React.FC = () => {
         quantidadePessoasCadastradas: 0,
         valorMonetarioPrevisto: '',
         valorMonetarioRealizado: 0,
+        imagem: '',
         status: true,
         impactoMensal: [],
         participantesProjeto: [],
@@ -531,6 +535,7 @@ export const Projetos: React.FC = () => {
                 quantidadePessoasCadastradas: 0,
                 valorMonetarioPrevisto: '',
                 valorMonetarioRealizado: 0,
+                imagem: '',
                 status: true,
                 impactoMensal: [],
                 participantesProjeto: [],
@@ -619,6 +624,28 @@ export const Projetos: React.FC = () => {
                     </option>
                   ))}
                 </select>
+              </div>
+
+              {/* Imagem (URL) */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Imagem do Projeto <span className="text-xs text-gray-500">(URL)</span>
+                </label>
+                <input
+                  type="url"
+                  value={formData.imagem}
+                  onChange={(e) => setFormData({ ...formData, imagem: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white"
+                  placeholder="https://exemplo.com/imagem.jpg"
+                />
+                {formData.imagem && (
+                  <img
+                    src={formData.imagem}
+                    alt="Preview"
+                    className="mt-2 h-20 w-full rounded-lg object-cover"
+                    onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                  />
+                )}
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -1035,6 +1062,21 @@ export const Projetos: React.FC = () => {
               </div>
             </div>
 
+            {selectedProjeto.imagem && (
+              <div className="mb-4 overflow-hidden rounded-lg border border-gray-200 dark:border-gray-700">
+                <img
+                  src={
+                    selectedProjeto.imagem.startsWith('http')
+                      ? selectedProjeto.imagem
+                      : `${import.meta.env.VITE_API_URL || ''}${selectedProjeto.imagem}`
+                  }
+                  alt={selectedProjeto.nome}
+                  className="h-auto max-h-[45vh] w-full object-contain bg-gray-50 dark:bg-gray-900"
+                  onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                />
+              </div>
+            )}
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
               <div className="rounded-lg bg-gray-50 dark:bg-gray-700/40 p-3">
                 <p className="text-xs text-gray-500 dark:text-gray-400">Data de Início</p>
@@ -1202,6 +1244,21 @@ export const Projetos: React.FC = () => {
               key={item.id}
               className="flex flex-col overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800"
             >
+            {item.imagem && (
+              <img
+                src={
+                  item.imagem.startsWith('http')
+                    ? item.imagem
+                    : `${import.meta.env.VITE_API_URL || ''}${item.imagem}`
+                }
+                alt={item.nome}
+                className="h-36 w-full object-cover"
+                onError={(e) => {
+                  const target = e.target as HTMLImageElement;
+                  target.style.display = 'none';
+                }}
+              />
+            )}
             <div className="flex flex-1 flex-col gap-3 p-4">
               {/* Título + status */}
               <div className="flex items-start justify-between gap-2">
