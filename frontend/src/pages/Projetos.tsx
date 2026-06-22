@@ -1244,7 +1244,7 @@ export const Projetos: React.FC = () => {
               key={item.id}
               className="flex flex-col overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800"
             >
-            {item.imagem && (
+            {item.imagem ? (
               <img
                 src={
                   item.imagem.startsWith('http')
@@ -1256,9 +1256,19 @@ export const Projetos: React.FC = () => {
                 onError={(e) => {
                   const target = e.target as HTMLImageElement;
                   target.style.display = 'none';
+                  const placeholder = target.nextElementSibling as HTMLElement | null;
+                  if (placeholder) placeholder.style.display = 'flex';
                 }}
               />
-            )}
+            ) : null}
+            <div
+              className={`h-36 w-full items-center justify-center bg-gradient-to-br from-primary-100 to-primary-200 dark:from-primary-900 dark:to-primary-800 ${item.imagem ? 'hidden' : 'flex'}`}
+            >
+              <svg className="h-14 w-14 text-primary-400 dark:text-primary-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 7a2 2 0 012-2h14a2 2 0 012 2v10a2 2 0 01-2 2H5a2 2 0 01-2-2V7z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 12h8M8 16h5" />
+              </svg>
+            </div>
             <div className="flex flex-1 flex-col gap-3 p-4">
               {/* Título + status */}
               <div className="flex items-start justify-between gap-2">
