@@ -265,12 +265,16 @@ export class UsuarioService {
     const codigo = `${Math.floor(100000 + Math.random() * 900000)}`;
     const expiraEm = new Date(Date.now() + 15 * 60 * 1000);
 
-    await this.emailService.enviarCodigoRedefinicao(usuario.email, usuario.nome, codigo);
-
     await runWithPrismaFallback(
       async () => this.usuarioRepository.updateResetCode(data.email, codigo, expiraEm),
       async () => this.updateResetCodeLocal(data.email, codigo, expiraEm),
     );
+
+    try {
+      await this.emailService.enviarCodigoRedefinicao(usuario.email, usuario.nome, codigo);
+    } catch (error) {
+      logger.warn(`Código salvo mas email não enviado para ${data.email}: ${(error as Error).message}. Código: ${codigo}`);
+    }
   }
 
   async resetPassword(data: ResetPasswordDTO): Promise<void> {
