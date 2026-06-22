@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Camera, KeyRound, LogOut, Moon, Save, Sun, Trash2, User, UserCog, X } from 'lucide-react';
 import { useAuthStore } from '@/store/authStore';
 import { useUIStore } from '@/store/uiStore';
@@ -8,6 +8,7 @@ import { BrandMark } from './BrandMark';
 
 export const Navbar: React.FC = () => {
   const { usuario, setUsuario, logout } = useAuthStore();
+  const navigate = useNavigate();
   const { darkMode, toggleDarkMode } = useUIStore();
   const [menuOpen, setMenuOpen] = useState(false);
   const [showEditProfile, setShowEditProfile] = useState(false);
@@ -365,7 +366,7 @@ export const Navbar: React.FC = () => {
             <button
               onClick={() => {
                 logout();
-                window.location.href = '/login';
+                navigate('/login');
               }}
               className="inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white p-2 text-slate-600 shadow-sm transition hover:border-red-300 hover:text-red-600 hover:shadow-md dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300"
               title="Logout"
