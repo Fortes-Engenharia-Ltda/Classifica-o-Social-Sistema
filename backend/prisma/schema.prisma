@@ -317,6 +317,20 @@ model InstituicaoSocial {
   @@index([dataRevisao])
 }
 
+model TokenCadastroInstituicao {
+  id              Int       @id @default(autoincrement())
+  token           String    @unique @db.Uuid
+  instituicaoId   Int?      @map("instituicao_id")
+  criadoPor       String    @map("criado_por") @db.VarChar(120)
+  usado           Boolean   @default(false)
+  usadoEm         DateTime? @map("usado_em")
+  expiraEm        DateTime  @map("expira_em")
+  dataCriacao     DateTime  @default(now()) @map("data_criacao")
+
+  @@map("tokens_cadastro_instituicao")
+  @@index([expiraEm])
+}
+
 model PublicoAlvo {
   id                Int                @id @default(autoincrement())
   nome              String             @db.VarChar(200)

@@ -259,6 +259,19 @@ CREATE TABLE "responsaveis_instituicao" (
 );
 
 -- CreateTable
+CREATE TABLE "tokens_cadastro_instituicao" (
+  "id" SERIAL PRIMARY KEY,
+  "token" UUID NOT NULL UNIQUE,
+  "instituicao_id" INTEGER,
+  "criado_por" VARCHAR(120) NOT NULL,
+  "usado" BOOLEAN NOT NULL DEFAULT false,
+  "usado_em" TIMESTAMP(3),
+  "expira_em" TIMESTAMP(3) NOT NULL,
+  "data_criacao" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX idx_tokens_expira_em ON "tokens_cadastro_instituicao"("expira_em");
+
 CREATE TABLE "responsaveis_tecnicos" (
     "id" SERIAL NOT NULL,
     "instituicao_id" INTEGER,

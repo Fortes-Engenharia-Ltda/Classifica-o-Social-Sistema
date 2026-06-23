@@ -989,7 +989,8 @@ export const Instituicoes: React.FC = () => {
         validadeValor: validadeRevisaoValor,
         validadeUnidade: validadeRevisaoUnidade,
       });
-      const url = response.data?.data?.url || '';
+      let url = response.data?.data?.url || '';
+      url = url.replace(/(https?:\/\/[^/]+)\/cadastros/, '$1/#/cadastros');
       setLinkRevisaoGerado(url);
       setLinkRevisaoValidoAte(response.data?.data?.validoAte ?? null);
       setMostrarModalLink(true);

@@ -15,8 +15,6 @@ interface TokenEntry {
   instituicaoId?: number;
 }
 
-// In-memory store — sobrevive enquanto o processo estiver rodando.
-// Em produção, persistir na tabela token_cadastro_instituicao.
 const tokenStore = new Map<string, TokenEntry>();
 const fallbackFilePath = path.resolve(process.cwd(), 'data', 'instituicoes-cadastros-fallback.json');
 
@@ -52,6 +50,42 @@ type TokenValidationResult =
   | { ok: true; entry: TokenEntry }
   | { ok: false; status: 404 | 409 | 410; message: string };
 
+export function gerarTokenParaInstituicao(
+  instituicaoId: number,
+  criadoPor: string,
+  expiryRequest: TokenExpiryRequest = {},
+): { token: string; expiry: Date; validadeValor: number; validadeUnidade: TokenExpiryUnit; validadeEmMinutos: number } {
+  limparExpirados();
+  const token = crypto.randomUUID();
+  const expiryConfig = resolveTokenExpiry(expiryRequest);
+  const { expiry } = expiryConfig;
+  tokenStore.set(token, { expiry, criadoPor, instituicaoId });
+
+  persistirTokenNoBanco(token, instituicaoId, criadoPor, expiry);
+
+  return { token, ...expiryConfig };
+}
+
+async function persistirTokenNoBanco(
+  token: string,
+  instituicaoId: number,
+  criadoPor: string,
+  expiry: Date,
+): Promise<void> {
+  try {
+    await prisma.tokenCadastroInstituicao.create({
+      data: {
+        token,
+        instituicaoId: instituicaoId > 0 ? instituicaoId : null,
+        criadoPor,
+        expiraEm: expiry,
+      },
+    });
+  } catch {
+    // DB persistencia falhou, token continua valido em memoria
+  }
+}
+
 export function validarTokenCadastro(token: string): TokenValidationResult {
   limparExpirados();
 
@@ -73,6 +107,50 @@ export function validarTokenCadastro(token: string): TokenValidationResult {
   return { ok: true, entry };
 }
 
+export async function validarTokenCadastroAsync(token: string): Promise<TokenValidationResult> {
+  limparExpirados();
+
+  const entry = tokenStore.get(token);
+  if (entry) {
+    if (entry.used) {
+      return { ok: false, status: 409, message: 'Token já utilizado' };
+    }
+    if (new Date() > entry.expiry) {
+      tokenStore.delete(token);
+      return { ok: false, status: 410, message: 'Token expirado' };
+    }
+    return { ok: true, entry };
+  }
+
+  try {
+    const dbEntry = await prisma.tokenCadastroInstituicao.findUnique({ where: { token } });
+    if (!dbEntry) {
+      return { ok: false, status: 404, message: 'Token inválido ou não encontrado' };
+    }
+
+    if (dbEntry.usado) {
+      return { ok: false, status: 409, message: 'Token já utilizado' };
+    }
+
+    if (new Date() > dbEntry.expiraEm) {
+      return { ok: false, status: 410, message: 'Token expirado' };
+    }
+
+    const hydratedEntry: TokenEntry = {
+      expiry: dbEntry.expiraEm,
+      criadoPor: dbEntry.criadoPor,
+      used: dbEntry.usado,
+      usedAt: dbEntry.usadoEm ?? undefined,
+      instituicaoId: dbEntry.instituicaoId ?? undefined,
+    };
+    tokenStore.set(token, hydratedEntry);
+
+    return { ok: true, entry: hydratedEntry };
+  } catch {
+    return { ok: false, status: 404, message: 'Token inválido ou não encontrado' };
+  }
+}
+
 export function consumirTokenCadastro(token: string): boolean {
   const resultado = validarTokenCadastro(token);
 
@@ -88,7 +166,21 @@ export function consumirTokenCadastro(token: string): boolean {
   entry.used = true;
   entry.usedAt = new Date();
   tokenStore.set(token, entry);
+
+  consumirTokenNoBanco(token);
+
   return true;
+}
+
+async function consumirTokenNoBanco(token: string): Promise<void> {
+  try {
+    await prisma.tokenCadastroInstituicao.update({
+      where: { token },
+      data: { usado: true, usadoEm: new Date() },
+    });
+  } catch {
+    // Best effort
+  }
 }
 
 function limparExpirados(): void {
@@ -144,19 +236,6 @@ export function resolveTokenExpiry(request: TokenExpiryRequest = {}): ResolvedTo
     validadeUnidade,
     validadeEmMinutos,
   };
-}
-
-export function gerarTokenParaInstituicao(
-  instituicaoId: number,
-  criadoPor: string,
-  expiryRequest: TokenExpiryRequest = {},
-): { token: string; expiry: Date; validadeValor: number; validadeUnidade: TokenExpiryUnit; validadeEmMinutos: number } {
-  limparExpirados();
-  const token = crypto.randomUUID();
-  const expiryConfig = resolveTokenExpiry(expiryRequest);
-  const { expiry } = expiryConfig;
-  tokenStore.set(token, { expiry, criadoPor, instituicaoId });
-  return { token, ...expiryConfig };
 }
 
 function getFallbackPublicId(item: any): number {
@@ -226,6 +305,7 @@ export class TokenCadastroController {
       const { expiry } = expiryConfig;
 
       tokenStore.set(token, { expiry, criadoPor: req.user?.email ?? 'desconhecido' });
+      persistirTokenNoBanco(token, 0, req.user?.email ?? 'desconhecido', expiry);
 
       res.status(201).json(
         successResponse('Token gerado com sucesso', {
@@ -254,7 +334,7 @@ export class TokenCadastroController {
           return;
         }
 
-        const validacao = validarTokenCadastro(token);
+        const validacao = await validarTokenCadastroAsync(token);
         if (!validacao.ok) {
           res.status(validacao.status).json(errorResponse(validacao.message));
           return;

@@ -4,7 +4,7 @@ import fs from 'fs/promises';
 import path from 'path';
 import prisma from '../config/database';
 import { successResponse, errorResponse } from '../utils/response';
-import { consumirTokenCadastro, validarTokenCadastro, gerarTokenParaInstituicao } from './TokenCadastroController';
+import { consumirTokenCadastro, validarTokenCadastroAsync, gerarTokenParaInstituicao } from './TokenCadastroController';
 import { AuthenticatedRequest } from '../middlewares/auth';
 import { EmailService } from '../services/EmailService';
 import logger from '../config/logger';
@@ -60,13 +60,14 @@ export class InstituicaoController {
       const termoAnexo = termoAnexoUpload ?? termoAnexoBody;
 
       const tokenNormalizado = typeof token === 'string' ? token.trim() : '';
-      let validacaoToken: ReturnType<typeof validarTokenCadastro> | null = null;
+      let tokenInstituicaoId: number | undefined;
       if (tokenNormalizado) {
-        validacaoToken = validarTokenCadastro(tokenNormalizado);
+        const validacaoToken = await validarTokenCadastroAsync(tokenNormalizado);
         if (!validacaoToken.ok) {
           res.status(validacaoToken.status).json(errorResponse(validacaoToken.message));
           return;
         }
+        tokenInstituicaoId = validacaoToken.entry.instituicaoId;
       }
 
       const camposInstituicaoObrigatorios = {
@@ -126,9 +127,7 @@ export class InstituicaoController {
         return;
       }
 
-      const instituicaoIdRevisao = tokenNormalizado && validacaoToken && validacaoToken.ok
-        ? validacaoToken.entry.instituicaoId
-        : undefined;
+      const instituicaoIdRevisao = tokenNormalizado ? tokenInstituicaoId : undefined;
 
       const payloadFallback = {
         instituicao,
