@@ -873,7 +873,7 @@ export class InstituicaoController {
         const instituicaoFallback = this.normalizeFallbackInstituicao(fallbackItens[fallbackIndex]);
         const responsavelFallback = instituicaoFallback.responsaveis?.[0] as any;
         const linkAjustesFallback = status === 'AJUSTES_SOLICITADOS'
-          ? `${process.env.FRONTEND_URL || 'http://localhost:5173'}/cadastros?token=${gerarTokenParaInstituicao(
+          ? `${process.env.FRONTEND_URL || 'http://localhost:5173'}/#/cadastros?token=${gerarTokenParaInstituicao(
               Number(instituicaoFallback.id),
               revisorEmail || revisorNome || 'sistema',
             ).token}`
@@ -927,7 +927,7 @@ export class InstituicaoController {
       // Enviar email para responsável da instituição
       const responsavel = instAtual.responsaveis?.[0] as any;
       const linkAjustes = status === 'AJUSTES_SOLICITADOS'
-        ? `${process.env.FRONTEND_URL || 'http://localhost:5173'}/cadastros?token=${gerarTokenParaInstituicao(
+        ? `${process.env.FRONTEND_URL || 'http://localhost:5173'}/#/cadastros?token=${gerarTokenParaInstituicao(
             instituicao.id,
             revisorEmail || revisorNome || 'sistema',
           ).token}`
@@ -1261,7 +1261,7 @@ export class InstituicaoController {
       );
       const { token, expiry, validadeValor, validadeUnidade, validadeEmMinutos } = tokenPayload;
       
-      const urlRevisao = `${process.env.FRONTEND_URL || 'http://localhost:5173'}/cadastros?token=${token}`;
+      const urlRevisao = `${process.env.FRONTEND_URL || 'http://localhost:5173'}/#/cadastros?token=${token}`;
       
       res.status(200).json(successResponse('Link de revisão gerado com sucesso', {
         url: urlRevisao,
