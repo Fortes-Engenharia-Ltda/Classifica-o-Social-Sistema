@@ -75,6 +75,9 @@ export const Login: React.FC = () => {
     } catch (err: any) {
       const msg = err.response?.data?.message || err.message || 'Erro ao solicitar redefinição de senha';
       console.error('[forgotPassword]', err);
+      console.error('[forgotPassword] status:', err.response?.status);
+      console.error('[forgotPassword] headers:', err.response?.headers);
+      console.error('[forgotPassword] data:', err.response?.data);
       setError(msg);
     } finally {
       setLoadingForgot(false);
