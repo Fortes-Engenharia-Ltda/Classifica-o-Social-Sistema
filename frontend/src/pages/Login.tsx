@@ -24,8 +24,6 @@ export const Login: React.FC = () => {
   const codigoTrimmed = codigo.trim();
   const codigoInformado = codigoTrimmed.length >= 6;
 
-  const [codigoGeradoLocal, setCodigoGeradoLocal] = useState('');
-
   const abrirModalEsqueciSenha = () => {
     setShowForgotPasswordModal(true);
     setForgotStep('email');
@@ -34,7 +32,6 @@ export const Login: React.FC = () => {
     setNovaSenha('');
     setError('');
     setSuccess('');
-    setCodigoGeradoLocal('');
   };
 
   const fecharModalEsqueciSenha = () => {
@@ -42,7 +39,6 @@ export const Login: React.FC = () => {
     setForgotStep('email');
     setCodigo('');
     setNovaSenha('');
-    setCodigoGeradoLocal('');
   };
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -72,17 +68,15 @@ export const Login: React.FC = () => {
     setSuccess('');
     setLoadingForgot(true);
 
-    const codigo = `${Math.floor(100000 + Math.random() * 900000)}`;
-    setCodigoGeradoLocal(codigo);
-    setCodigo(codigo);
-    localStorage.setItem('resetCode', codigo);
-    localStorage.setItem('resetEmail', forgotEmail);
-
-    setSuccess(`Código gerado: ${codigo}. Use este código para redefinir sua senha.`);
-    setForgotStep('codigo');
-    setLoadingForgot(false);
-
-    UsuarioService.forgotPassword({ email: forgotEmail }).catch(() => {});
+    try {
+      await UsuarioService.forgotPassword({ email: forgotEmail });
+      setSuccess('Código enviado para seu email. Verifique sua caixa de entrada.');
+      setForgotStep('codigo');
+    } catch (err: any) {
+      setError(err.response?.data?.message || 'Erro ao enviar código. Tente novamente.');
+    } finally {
+      setLoadingForgot(false);
+    }
   };
 
   const handleResetPassword = async (e: React.FormEvent) => {
@@ -104,24 +98,11 @@ export const Login: React.FC = () => {
     }
 
     try {
-      let response;
-      try {
-        response = await UsuarioService.resetPassword({
-          email: forgotEmail,
-          codigo: codigoTrimmed,
-          novaSenha,
-        });
-      } catch {
-        const localCode = localStorage.getItem('resetCode');
-        const localEmail = localStorage.getItem('resetEmail');
-        if (localCode === codigoTrimmed && localEmail === forgotEmail) {
-          response = { message: 'Senha redefinida com sucesso. Faça login novamente.' };
-          localStorage.removeItem('resetCode');
-          localStorage.removeItem('resetEmail');
-        } else {
-          throw new Error('Código inválido');
-        }
-      }
+      const response = await UsuarioService.resetPassword({
+        email: forgotEmail,
+        codigo: codigoTrimmed,
+        novaSenha,
+      });
       setSuccess(response.message || 'Senha redefinida com sucesso. Faça login novamente.');
       setCodigo('');
       setNovaSenha('');

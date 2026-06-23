@@ -36,8 +36,8 @@ services:
       - key: SMTP_SECURE
         value: 'false'
       - key: SMTP_USER
-        sync: false
+        value: inovafortes@fortes.ind.br
       - key: SMTP_PASS
         sync: false
       - key: SMTP_FROM
-        sync: false
+        value: inovafortes@fortes.ind.br
