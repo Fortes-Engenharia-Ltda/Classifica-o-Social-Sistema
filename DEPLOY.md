@@ -24,7 +24,7 @@ O Render é uma plataforma gratuita que hospeda o backend (API).
    - `DATABASE_URL` → a URL de conexão do Supabase (igual está no seu `.env`)
    - `DIRECT_URL` → a URL direta do Supabase
    - `JWT_SECRET` → clique em **Generate Value**
-   - `FRONTEND_URL` → `https://fortes-engenharia-ltda.github.io/Classifica-o-Social-Sistema`
+   - `FRONTEND_URL` → `https://classificacaosocial-fortes.vercel.app`
    - `NODE_ENV` → `production`
 
 6. Clique em **"Create Web Service"**
@@ -53,7 +53,7 @@ O Render é uma plataforma gratuita que hospeda o backend (API).
 5. Faça um commit na branch `main`. O GitHub Actions vai automaticamente fazer o build e publicar o frontend.
 
 6. Pronto! O sistema estará disponível em:
-   `https://fortes-engenharia-ltda.github.io/Classifica-o-Social-Sistema/`
+   `https://classificacaosocial-fortes.vercel.app`
 
 ---
 

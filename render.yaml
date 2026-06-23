@@ -22,7 +22,7 @@ services:
       - key: JWT_EXPIRES_IN
         value: 7d
       - key: FRONTEND_URL
-        value: https://fortes-engenharia-ltda.github.io/Classifica-o-Social-Sistema
+        value: https://classificacaosocial-fortes.vercel.app
       - key: LOG_LEVEL
         value: info
       - key: UPLOAD_DIR
