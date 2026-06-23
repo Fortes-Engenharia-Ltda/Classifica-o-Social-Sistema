@@ -6,6 +6,7 @@ import { AuthenticatedRequest } from '../middlewares/auth';
 import { successResponse, errorResponse } from '../utils/response';
 import prisma from '../config/database';
 import { runWithPrismaFallback } from '../utils/prismaCircuitBreaker';
+import logger from '../config/logger';
 
 interface TokenEntry {
   expiry: Date;
@@ -61,11 +62,17 @@ const SQL_CRIAR_TABELA = `
     "expira_em" TIMESTAMP(3) NOT NULL,
     "data_criacao" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT "tokens_cadastro_instituicao_pkey" PRIMARY KEY ("id")
-  );
+  )
+`;
+
+const SQL_CRIAR_INDEX_TOKEN = `
   CREATE UNIQUE INDEX IF NOT EXISTS "tokens_cadastro_instituicao_token_key"
-    ON "tokens_cadastro_instituicao"("token");
+  ON "tokens_cadastro_instituicao"("token")
+`;
+
+const SQL_CRIAR_INDEX_EXPIRA = `
   CREATE INDEX IF NOT EXISTS "tokens_cadastro_instituicao_expira_em_idx"
-    ON "tokens_cadastro_instituicao"("expira_em");
+  ON "tokens_cadastro_instituicao"("expira_em")
 `;
 
 const SQL_INSERIR_TOKEN = `
@@ -87,9 +94,11 @@ async function garantirTabelaToken(): Promise<void> {
   if (tabelaGarantida) return;
   try {
     await prisma.$executeRawUnsafe(SQL_CRIAR_TABELA);
+    await prisma.$executeRawUnsafe(SQL_CRIAR_INDEX_TOKEN);
+    await prisma.$executeRawUnsafe(SQL_CRIAR_INDEX_EXPIRA);
     tabelaGarantida = true;
-  } catch {
-    // Tabela nao pode ser criada — usa apenas memoria
+  } catch (err) {
+    logger.error('Falha ao criar tabela de tokens (usando apenas memoria):', err);
   }
 }
 
@@ -187,7 +196,8 @@ export async function validarTokenCadastroAsync(token: string): Promise<TokenVal
     tokenStore.set(token, hydratedEntry);
 
     return { ok: true, entry: hydratedEntry };
-  } catch {
+  } catch (err) {
+    logger.error('Erro ao validar token no banco:', err);
     return { ok: false, status: 404, message: 'Token inválido ou não encontrado' };
   }
 }
