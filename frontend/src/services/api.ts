@@ -1,7 +1,7 @@
 import axios, { AxiosInstance } from 'axios';
 
 const api: AxiosInstance = axios.create({
-  baseURL: '/api',
+  baseURL: 'https://classificacao-social-backend.onrender.com/api',
   timeout: 15000,
 });
 
