@@ -1,10 +1,8 @@
 const DB_RETRY_COOLDOWN_MS = 30000;
+const PRISMA_TIMEOUT_MS = 10000;
+const DB_FALLBACK_ENABLED = process.env.DB_FALLBACK_ENABLED === 'false' ? false : true;
 
 let skipPrismaUntil = 0;
-
-function isFallbackEnabled(): boolean {
-  return process.env.DB_FALLBACK_ENABLED === 'true';
-}
 
 function isDatabaseUnavailableError(error: unknown): boolean {
   const message =
@@ -16,7 +14,8 @@ function isDatabaseUnavailableError(error: unknown): boolean {
     message.includes("Can't reach database server") ||
     message.includes('ECONNREFUSED') ||
     message.includes('db:5432') ||
-    message.includes('P1001')
+    message.includes('P1001') ||
+    message.includes('Prisma query timed out')
   );
 }
 
@@ -30,11 +29,26 @@ export function markPrismaUnavailable(error: unknown): void {
   }
 }
 
+async function withTimeout<T>(action: () => Promise<T>, ms: number): Promise<T> {
+  let timer: ReturnType<typeof setTimeout>;
+  const timeout = new Promise<T>((_, reject) => {
+    timer = setTimeout(() => reject(new Error('Prisma query timed out')), ms);
+  });
+  try {
+    const result = await Promise.race([action(), timeout]);
+    clearTimeout(timer!);
+    return result;
+  } catch (error) {
+    clearTimeout(timer!);
+    throw error;
+  }
+}
+
 export async function runWithPrismaFallback<T>(
   prismaAction: () => Promise<T>,
   fallbackAction: () => Promise<T>,
 ): Promise<T> {
-  if (!isFallbackEnabled()) {
+  if (!DB_FALLBACK_ENABLED) {
     return prismaAction();
   }
 
@@ -43,7 +57,7 @@ export async function runWithPrismaFallback<T>(
   }
 
   try {
-    return await prismaAction();
+    return await withTimeout(prismaAction, PRISMA_TIMEOUT_MS);
   } catch (error) {
     markPrismaUnavailable(error);
     return fallbackAction();
