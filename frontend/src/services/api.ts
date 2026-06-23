@@ -4,7 +4,7 @@ const configuredBaseURL = String(import.meta.env.VITE_API_URL || '').trim();
 
 const api: AxiosInstance = axios.create({
   baseURL: configuredBaseURL || '/api',
-  timeout: 10000,
+  timeout: 60000,
 });
 
 // Interceptador para adicionar token

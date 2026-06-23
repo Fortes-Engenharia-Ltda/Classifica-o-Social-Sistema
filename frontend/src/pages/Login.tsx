@@ -73,7 +73,9 @@ export const Login: React.FC = () => {
       setSuccess(response.message || 'Se o email estiver cadastrado, um código será enviado.');
       setForgotStep('codigo');
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Erro ao solicitar redefinição de senha');
+      const msg = err.response?.data?.message || err.message || 'Erro ao solicitar redefinição de senha';
+      console.error('[forgotPassword]', err);
+      setError(msg);
     } finally {
       setLoadingForgot(false);
     }
