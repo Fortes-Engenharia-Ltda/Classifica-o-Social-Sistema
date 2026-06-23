@@ -270,11 +270,7 @@ export class UsuarioService {
       async () => this.updateResetCodeLocal(data.email, codigo, expiraEm),
     );
 
-    try {
-      await this.emailService.enviarCodigoRedefinicao(usuario.email, usuario.nome, codigo);
-    } catch (error) {
-      logger.warn(`Código salvo mas email não enviado para ${data.email}: ${(error as Error).message}. Código: ${codigo}`);
-    }
+    await this.emailService.enviarCodigoRedefinicao(usuario.email, usuario.nome, codigo);
   }
 
   async resetPassword(data: ResetPasswordDTO): Promise<void> {

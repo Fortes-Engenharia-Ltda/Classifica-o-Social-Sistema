@@ -91,31 +91,24 @@ export class EmailService {
   async enviarCodigoRedefinicao(email: string, nome: string, codigo: string): Promise<void> {
     const smtp = this.getRuntimeEmailConfig();
     if (!this.hasSmtpConfig()) {
-      logger.warn(
-        `SMTP não configurado. Código de redefinição para ${email}: ${codigo}. Configure SMTP_* no backend para envio real.`,
-      );
-      return;
+      throw new Error('SMTP não configurado. Configure as variáveis SMTP_* no ambiente.');
     }
 
-    try {
-      const transporter = this.createTransport(smtp);
+    const transporter = this.createTransport(smtp);
 
-      const rendered = this.renderTemplate('PASSWORD_RESET', {
-        nome,
-        codigo,
-      });
+    const rendered = this.renderTemplate('PASSWORD_RESET', {
+      nome,
+      codigo,
+    });
 
-      await transporter.sendMail({
-        from: smtp.from,
-        to: email,
-        subject: rendered.subject,
-        html: rendered.html,
-        text: this.stripHtml(rendered.html),
-      });
-      logger.info(`Email de redefinição enviado com sucesso para ${email}`);
-    } catch (error) {
-      logger.error(`Falha ao enviar email de redefinição para ${email}: ${(error as Error).message}`, error);
-    }
+    await transporter.sendMail({
+      from: smtp.from,
+      to: email,
+      subject: rendered.subject,
+      html: rendered.html,
+      text: this.stripHtml(rendered.html),
+    });
+    logger.info(`Email de redefinição enviado com sucesso para ${email}`);
   }
 
   async enviarNotificacaoStatusInstituicao(
