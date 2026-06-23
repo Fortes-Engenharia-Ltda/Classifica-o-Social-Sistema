@@ -29,9 +29,7 @@ export const CadastrosInstituicoes: React.FC = () => {
       return;
     }
 
-    const apiUrl = import.meta.env.VITE_API_URL ?? '';
-
-    fetch(`${apiUrl}/token-cadastro/validar?token=${encodeURIComponent(token)}`)
+    fetch(`/api/token-cadastro/validar?token=${encodeURIComponent(token)}`)
       .then(async (res) => {
         const body = await res.json();
         if (res.ok) {
@@ -49,10 +47,15 @@ export const CadastrosInstituicoes: React.FC = () => {
         } else if (res.status === 410) {
           setEstado('expirado');
         } else {
+          const msg = body?.message || 'Token inválido';
           setEstado('invalido');
+          console.warn('Erro validacao token:', res.status, msg);
         }
       })
-      .catch(() => setEstado('invalido'));
+      .catch((err) => {
+        console.error('Erro rede validacao token:', err);
+        setEstado('invalido');
+      });
   }, [token]);
 
   useEffect(() => {
