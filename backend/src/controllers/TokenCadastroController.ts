@@ -50,6 +50,49 @@ type TokenValidationResult =
   | { ok: true; entry: TokenEntry }
   | { ok: false; status: 404 | 409 | 410; message: string };
 
+const SQL_CRIAR_TABELA = `
+  CREATE TABLE IF NOT EXISTS "tokens_cadastro_instituicao" (
+    "id" SERIAL NOT NULL,
+    "token" UUID NOT NULL,
+    "instituicao_id" INTEGER,
+    "criado_por" VARCHAR(120) NOT NULL,
+    "usado" BOOLEAN NOT NULL DEFAULT false,
+    "usado_em" TIMESTAMP(3),
+    "expira_em" TIMESTAMP(3) NOT NULL,
+    "data_criacao" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT "tokens_cadastro_instituicao_pkey" PRIMARY KEY ("id")
+  );
+  CREATE UNIQUE INDEX IF NOT EXISTS "tokens_cadastro_instituicao_token_key"
+    ON "tokens_cadastro_instituicao"("token");
+  CREATE INDEX IF NOT EXISTS "tokens_cadastro_instituicao_expira_em_idx"
+    ON "tokens_cadastro_instituicao"("expira_em");
+`;
+
+const SQL_INSERIR_TOKEN = `
+  INSERT INTO "tokens_cadastro_instituicao" ("token", "instituicao_id", "criado_por", "expira_em")
+  VALUES ($1, $2, $3, $4)
+`;
+
+const SQL_BUSCAR_TOKEN = `
+  SELECT * FROM "tokens_cadastro_instituicao" WHERE "token" = $1
+`;
+
+const SQL_CONSUMIR_TOKEN = `
+  UPDATE "tokens_cadastro_instituicao" SET "usado" = true, "usado_em" = NOW() WHERE "token" = $1
+`;
+
+let tabelaGarantida = false;
+
+async function garantirTabelaToken(): Promise<void> {
+  if (tabelaGarantida) return;
+  try {
+    await prisma.$executeRawUnsafe(SQL_CRIAR_TABELA);
+    tabelaGarantida = true;
+  } catch {
+    // Tabela nao pode ser criada — usa apenas memoria
+  }
+}
+
 export function gerarTokenParaInstituicao(
   instituicaoId: number,
   criadoPor: string,
@@ -73,16 +116,10 @@ async function persistirTokenNoBanco(
   expiry: Date,
 ): Promise<void> {
   try {
-    await prisma.tokenCadastroInstituicao.create({
-      data: {
-        token,
-        instituicaoId: instituicaoId > 0 ? instituicaoId : null,
-        criadoPor,
-        expiraEm: expiry,
-      },
-    });
+    await garantirTabelaToken();
+    await prisma.$executeRawUnsafe(SQL_INSERIR_TOKEN, token, instituicaoId > 0 ? instituicaoId : null, criadoPor, expiry);
   } catch {
-    // DB persistencia falhou, token continua valido em memoria
+    // Best effort — token continua valido em memoria
   }
 }
 
@@ -123,25 +160,29 @@ export async function validarTokenCadastroAsync(token: string): Promise<TokenVal
   }
 
   try {
-    const dbEntry = await prisma.tokenCadastroInstituicao.findUnique({ where: { token } });
-    if (!dbEntry) {
+    await garantirTabelaToken();
+    const rows: any[] = await prisma.$queryRawUnsafe(SQL_BUSCAR_TOKEN, token);
+    if (!rows || rows.length === 0) {
       return { ok: false, status: 404, message: 'Token inválido ou não encontrado' };
     }
 
-    if (dbEntry.usado) {
+    const row = rows[0];
+
+    if (row.usado) {
       return { ok: false, status: 409, message: 'Token já utilizado' };
     }
 
-    if (new Date() > dbEntry.expiraEm) {
+    const expiraEm = new Date(row.expira_em);
+    if (new Date() > expiraEm) {
       return { ok: false, status: 410, message: 'Token expirado' };
     }
 
     const hydratedEntry: TokenEntry = {
-      expiry: dbEntry.expiraEm,
-      criadoPor: dbEntry.criadoPor,
-      used: dbEntry.usado,
-      usedAt: dbEntry.usadoEm ?? undefined,
-      instituicaoId: dbEntry.instituicaoId ?? undefined,
+      expiry: expiraEm,
+      criadoPor: row.criado_por,
+      used: row.usado,
+      usedAt: row.usado_em ?? undefined,
+      instituicaoId: row.instituicao_id ?? undefined,
     };
     tokenStore.set(token, hydratedEntry);
 
@@ -174,10 +215,8 @@ export function consumirTokenCadastro(token: string): boolean {
 
 async function consumirTokenNoBanco(token: string): Promise<void> {
   try {
-    await prisma.tokenCadastroInstituicao.update({
-      where: { token },
-      data: { usado: true, usadoEm: new Date() },
-    });
+    await garantirTabelaToken();
+    await prisma.$executeRawUnsafe(SQL_CONSUMIR_TOKEN, token);
   } catch {
     // Best effort
   }
