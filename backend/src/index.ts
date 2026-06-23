@@ -13,19 +13,8 @@ const app = express();
 
 // Middlewares de segurança
 app.use(helmet());
-const allowedOrigins = [
-  config.server.frontendUrl,
-  'https://classificacaosocial-fortes.vercel.app',
-  'https://classificacao-social-sistema.vercel.app',
-].filter(Boolean);
-
 app.use(cors({
-  origin: (origin, callback) => {
-    if (!origin) return callback(null, true);
-    if (allowedOrigins.includes(origin)) return callback(null, true);
-    if (origin.endsWith('.vercel.app')) return callback(null, true);
-    callback(new Error('Not allowed by CORS'));
-  },
+  origin: true,
   credentials: true,
 }));
 
