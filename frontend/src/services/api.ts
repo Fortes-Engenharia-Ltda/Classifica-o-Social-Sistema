@@ -2,7 +2,7 @@ import axios, { AxiosInstance } from 'axios';
 
 const api: AxiosInstance = axios.create({
   baseURL: '/api',
-  timeout: 60000,
+  timeout: 15000,
 });
 
 // Interceptador para adicionar token
