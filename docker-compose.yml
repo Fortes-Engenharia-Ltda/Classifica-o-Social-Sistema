@@ -1,4 +1,23 @@
 services:
+  postgres:
+    image: postgres:16-alpine
+    restart: always
+    environment:
+      POSTGRES_DB: classificacao_social
+      POSTGRES_USER: classificacao_social_user
+      POSTGRES_PASSWORD: classificacao_social_pass
+    ports:
+      - '5432:5432'
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U classificacao_social_user -d classificacao_social']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - app-network
+
   backend:
     build:
       context: ./backend
@@ -6,8 +25,14 @@ services:
     restart: always
     env_file:
       - ./backend/.env
+    environment:
+      DATABASE_URL: postgresql://classificacao_social_user:classificacao_social_pass@postgres:5432/classificacao_social?schema=public
+      DIRECT_URL: postgresql://classificacao_social_user:classificacao_social_pass@postgres:5432/classificacao_social?schema=public
     ports:
       - '3001:3001'
+    depends_on:
+      postgres:
+        condition: service_healthy
     networks:
       - app-network
 
@@ -26,3 +51,6 @@ services:
 networks:
   app-network:
     driver: bridge
+
+volumes:
+  postgres-data:

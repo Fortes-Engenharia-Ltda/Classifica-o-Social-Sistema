@@ -107,38 +107,34 @@ classificacao-social/
 - Node.js 20+
 - Docker e Docker Compose
 
-### Instalação com Docker (Supabase Only)
+### Instalação com Docker (100% Local)
 
 1. **Clone ou copie o projeto para seu local:**
 ```bash
 cd classificacao-social
 ```
 
-2. **No Supabase, copie a URI exata da Session pooler (Connect > Session pooler, porta 5432).**
-
-3. **Configure as variáveis no backend/.env usando exatamente a URI copiada:**
+2. **Crie o arquivo de ambiente do backend:**
 ```bash
-DATABASE_URL="COLE_AQUI_A_URI_DA_SESSION_POOLER"
-DIRECT_URL="COLE_AQUI_A_URI_DA_SESSION_POOLER"
-DB_FALLBACK_ENABLED=false
+cp backend/.env.example backend/.env
 ```
 
-4. **Execute o script inicial de tabelas no Supabase (SQL Editor):**
-```bash
-database/supabase_init.sql
-```
-
-5. **Execute o seed de dados iniciais no Supabase (SQL Editor):**
-```bash
-database/supabase_seed.sql
-```
-
-6. **Suba aplicação com Docker Compose (sem PostgreSQL local):**
+3. **Suba aplicação com Docker Compose (backend, frontend e PostgreSQL local):**
 ```bash
 docker-compose up -d --build
 ```
 
-7. **Valide as rotas com dados do Supabase:**
+4. **Aplique migrations no banco local:**
+```bash
+docker-compose exec backend npx prisma migrate deploy
+```
+
+5. **(Opcional) Rode seed inicial:**
+```bash
+docker-compose exec backend npm run seed
+```
+
+6. **Valide as rotas:**
 ```bash
 # 1) Login
 POST /api/usuarios/login
@@ -153,11 +149,11 @@ GET /api/dashboard/metricas
 GET /api/notas-fiscais
 ```
 
-6. **Acesse o sistema:**
+7. **Acesse o sistema:**
 - Backend: http://localhost:3001
 - Frontend: http://localhost:3000
 
-### Instalação Local (Supabase Only)
+### Instalação Local (sem serviços externos)
 
 #### Backend
 
@@ -167,19 +163,27 @@ cd backend
 npm install
 ```
 
-2. **Confirme DATABASE_URL e DIRECT_URL no backend/.env** com a URI exata da Session pooler do Supabase.
+2. **Copie o arquivo de ambiente:**
+```bash
+cp .env.example .env
+```
 
-3. **Aplique migrations no Supabase:**
+3. **Suba somente o PostgreSQL local via Docker:**
+```bash
+docker-compose up -d postgres
+```
+
+4. **Aplique migrations no banco local:**
 ```bash
 npx prisma migrate deploy
 ```
 
-4. **(Opcional) Rode seed inicial:**
+5. **(Opcional) Rode seed inicial:**
 ```bash
 npm run seed
 ```
 
-5. **Inicie o backend:**
+6. **Inicie o backend:**
 ```bash
 npm run dev
 ```
@@ -359,7 +363,8 @@ docker-compose up -d
 
 **Backend (.env)**
 ```
-DATABASE_URL=postgresql://user:password@db:5432/classificacao_social
+DATABASE_URL=postgresql://classificacao_social_user:classificacao_social_pass@localhost:5432/classificacao_social?schema=public
+DIRECT_URL=postgresql://classificacao_social_user:classificacao_social_pass@localhost:5432/classificacao_social?schema=public
 JWT_SECRET=seu-segredo-super-secreto
 NODE_ENV=production
 PORT=3001

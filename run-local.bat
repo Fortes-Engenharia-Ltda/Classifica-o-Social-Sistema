@@ -6,6 +6,13 @@ echo   Classificacao Social - Start Local (Windows)
 echo ==============================================
 echo.
 
+where docker >nul 2>nul
+if %errorlevel%==0 (
+  echo Iniciando PostgreSQL local via Docker Compose...
+  docker compose up -d postgres
+  echo.
+)
+
 if not exist "backend\node_modules" (
   echo [AVISO] Backend sem dependencias instaladas.
   echo Execute primeiro: cd backend ^&^& npm install

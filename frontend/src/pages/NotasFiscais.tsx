@@ -727,11 +727,11 @@ export const NotasFiscais: React.FC = () => {
 
   const resolveActionCodeLabel = (actionCode?: number | null) => {
     if (actionCode === 10) {
-      return '10 - Accounts Payable';
+      return '10 - Contas a Pagar';
     }
 
     if (actionCode === 70) {
-      return '70 - Reimbursement';
+      return '70 - Reembolso';
     }
 
     return '-';
@@ -1782,8 +1782,8 @@ export const NotasFiscais: React.FC = () => {
                 onChange={(e) => setFormData({ ...formData, actionCode: Number(e.target.value) })}
                 className="w-full rounded-lg border border-slate-300 px-3 py-2"
               >
-                <option value={10}>10 - Accounts Payable</option>
-                <option value={70}>70 - Reimbursement</option>
+                <option value={10}>10 - Contas a Pagar</option>
+                <option value={70}>70 - Reembolso</option>
               </select>
 
               <div className="flex gap-2 pt-2">
