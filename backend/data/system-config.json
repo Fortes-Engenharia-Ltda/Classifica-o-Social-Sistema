@@ -1,0 +1,50 @@
+{
+  "MASTER": {
+    "dashboard": true,
+    "notas-fiscais": true,
+    "classificacoes": true,
+    "obras": true,
+    "projetos": true,
+    "programas": true,
+    "instituicoes": true,
+    "usuarios": true,
+    "admin-cadastros": true,
+    "configuracao-sistema": true
+  },
+  "ADMIN": {
+    "dashboard": true,
+    "notas-fiscais": true,
+    "classificacoes": true,
+    "obras": true,
+    "projetos": true,
+    "programas": true,
+    "instituicoes": true,
+    "usuarios": true,
+    "admin-cadastros": true,
+    "configuracao-sistema": false
+  },
+  "ANALYST": {
+    "dashboard": true,
+    "notas-fiscais": true,
+    "classificacoes": true,
+    "obras": false,
+    "projetos": false,
+    "programas": false,
+    "instituicoes": true,
+    "usuarios": false,
+    "admin-cadastros": false,
+    "configuracao-sistema": false
+  },
+  "MANAGER": {
+    "dashboard": true,
+    "notas-fiscais": true,
+    "classificacoes": false,
+    "obras": true,
+    "projetos": true,
+    "programas": true,
+    "instituicoes": true,
+    "usuarios": false,
+    "admin-cadastros": false,
+    "configuracao-sistema": false
+  }
+}

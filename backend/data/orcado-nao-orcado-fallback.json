@@ -1,0 +1,23 @@
+[
+  {
+    "id": 1,
+    "nome": "Orçado",
+    "status": true,
+    "dataCriacao": "2026-06-01T20:57:44.428Z",
+    "dataAtualizacao": "2026-06-01T21:45:02.388Z"
+  },
+  {
+    "id": 2,
+    "nome": "Não Orçado",
+    "status": true,
+    "dataCriacao": "2026-06-01T20:57:52.216Z",
+    "dataAtualizacao": "2026-06-01T20:57:52.216Z"
+  },
+  {
+    "id": 3,
+    "nome": "nÃO EMPENHADOS",
+    "status": false,
+    "dataCriacao": "2026-06-03T18:32:51.522Z",
+    "dataAtualizacao": "2026-06-08T14:06:21.387Z"
+  }
+]

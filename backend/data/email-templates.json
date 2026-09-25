@@ -1,0 +1,14 @@
+{
+  "PASSWORD_RESET": {
+    "subject": "Codigo para redefinir senha do Sitema Classificação Social!",
+    "html": "<div style=\"font-family: Arial, sans-serif; font-size: 14px; color: #111827;\">\n        <p>Ola <strong>{{nome}}</strong>,</p>\n        <p>Seu codigo para redefinir a senha e:</p>\n        <p style=\"font-size: 24px; font-weight: bold; letter-spacing: 2px;\">{{codigo}}</p>\n        <p>Este codigo expira em 15 minutos.</p>\n        <p>Atenciosamente,<br/><em>Fortificar</em></p>\n      </div>"
+  },
+  "INSTITUICAO_REVISAO": {
+    "subject": "Atualizacao da revisao da instituicao {{nomeInstituicao}}!",
+    "html": "<div style=\"font-family: Arial, sans-serif; font-size: 14px; color: #111827;\">\n        <p>Ola <strong>{{nomeResponsavel}}</strong>,</p>\n        <p>{{statusMensagem}}</p>\n        <p><strong>Status:</strong> {{status}}</p>\n        <p><strong>Motivo:</strong> {{motivo}}</p>\n        <p><strong>Link de ajustes:</strong> <a href=\"{{linkAjustes}}\">{{linkAjustes}}</a></p>\n        <p>Atenciosamente,<br/><em>Fortificar</em></p>\n</div>"
+  },
+  "USER_WELCOME": {
+    "subject": "Bem-vindo ao Sistema de Classificacao Social!",
+    "html": "<div style=\"font-family: Arial, sans-serif; font-size: 14px; color: #111827;\">\n        <p>Ola <strong>{{nome}}</strong>,</p>\n        <p>Seu acesso ao Sistema de Classificacao Social foi criado com sucesso.</p>\n        <p><strong>Email:</strong> {{email}}</p>\n        <p><strong>Senha inicial:</strong> {{senhaInicial}}</p>\n        <p>Por seguranca, recomendamos alterar sua senha no primeiro acesso.</p>\n        <p>Atenciosamente,<br/>Fortes Engenharia</p>\n      </div>"
+  }
+}

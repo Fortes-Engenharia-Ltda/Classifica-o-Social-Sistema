@@ -1,0 +1,43 @@
+services:
+  - type: web
+    name: classificacao-social-backend
+    env: node
+    region: oregon
+    plan: free
+    rootDir: backend
+    buildCommand: npm install --legacy-peer-deps --include=dev && ./node_modules/.bin/prisma generate && npm run build
+    startCommand: npm run start:prod
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: '3001'
+      - key: DATABASE_URL
+        sync: false
+      - key: DIRECT_URL
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true
+      - key: JWT_EXPIRES_IN
+        value: 7d
+      - key: FRONTEND_URL
+        value: https://classificacaosocial-fortes.vercel.app
+      - key: LOG_LEVEL
+        value: info
+      - key: UPLOAD_DIR
+        value: ./uploads
+
+      # SMTP (Office 365) — configurar valores no dashboard do Render
+      - key: SMTP_HOST
+        value: smtp.office365.com
+      - key: SMTP_PORT
+        value: '587'
+      - key: SMTP_SECURE
+        value: 'false'
+      - key: SMTP_USER
+        value: inovafortes@fortes.ind.br
+      - key: SMTP_PASS
+        sync: false
+      - key: SMTP_FROM
+        value: inovafortes@fortes.ind.br
