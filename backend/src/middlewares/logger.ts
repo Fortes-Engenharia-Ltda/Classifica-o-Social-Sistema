@@ -6,6 +6,12 @@ export const loggerMiddleware = (
   res: Response,
   next: NextFunction,
 ): void => {
+  // Consultado pela tela a cada poucos segundos; so polui o log.
+  if (req.path.endsWith('/sincronizar-dw/status')) {
+    next();
+    return;
+  }
+
   const start = Date.now();
 
   res.on('finish', () => {

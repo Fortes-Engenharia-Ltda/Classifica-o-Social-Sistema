@@ -1,5 +1,7 @@
 import sql from 'mssql';
 import { config } from '../config';
+import logger from '../config/logger';
+import { NOTAS_FISCAIS_FORTIFICAR_SQL } from './sql/notasFiscaisFortificar';
 
 export interface VwNotaFiscalRow {
   idLancamento: number | null;
@@ -44,8 +46,8 @@ export class SqlServerNotasFiscaisService {
         encrypt: config.sqlServer.encrypt,
         trustServerCertificate: config.sqlServer.trustServerCertificate,
       },
-      // A view faz vários joins sobre as tabelas do Mega e pode demorar alguns minutos.
-      requestTimeout: 10 * 60 * 1000,
+      // O lote leva cerca de 30 segundos; a folga cobre o staging mais carregado.
+      requestTimeout: 5 * 60 * 1000,
       pool: {
         max: 2,
         min: 0,
@@ -54,27 +56,16 @@ export class SqlServerNotasFiscaisService {
     });
 
     await pool.connect();
+    logger.info('Sincronizacao DW: conectado ao SQL Server, lendo notas das contas do Fortificar');
+    const inicioConsulta = Date.now();
 
     try {
-      const result = await pool.request().query(`
-        SELECT
-          idLancamento,
-          idFilial,
-          obra_id,
-          idPlanoContas,
-          ref,
-          idFornecedor,
-          fornecedor,
-          cnpj,
-          numero_nf,
-          tipoDocumento,
-          tipoDocumentoBaixa,
-          data_emissao,
-          data_pagamento,
-          valor
-        FROM dbo.vw_notas_fiscais
-        ORDER BY idLancamento, obra_id, ref, numero_nf
-      `);
+      const result = await pool.request().batch(NOTAS_FISCAIS_FORTIFICAR_SQL);
+
+      logger.info('Sincronizacao DW: leitura das notas concluida', {
+        linhas: result.recordset?.length ?? 0,
+        segundos: Math.round((Date.now() - inicioConsulta) / 1000),
+      });
 
       return (result.recordset || []).map((row: any) => ({
         idLancamento: row.idLancamento != null ? Number(row.idLancamento) : null,
