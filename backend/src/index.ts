@@ -8,6 +8,7 @@ import logger from './config/logger';
 import routes from './routes';
 import { errorHandler, notFoundHandler } from './middlewares/errorHandler';
 import { loggerMiddleware } from './middlewares/logger';
+import { dwSyncService } from './services/DwSyncService';
 
 const app = express();
 
@@ -46,6 +47,7 @@ const port = config.server.port;
 app.listen(port, () => {
   logger.info(`Servidor iniciado na porta ${port}`);
   logger.info(`Ambiente: ${config.server.env}`);
+  dwSyncService.iniciarAgendamento();
 });
 
 export default app;

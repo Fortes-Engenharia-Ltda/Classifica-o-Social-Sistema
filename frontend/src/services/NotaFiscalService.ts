@@ -1,6 +1,24 @@
 import api from './api';
 import { NotaFiscal } from '@/types';
 
+export type DwSyncExecucao = {
+  origem: 'AGENDADA' | 'MANUAL';
+  iniciadaEm: string;
+  finalizadaEm: string;
+  sucesso: boolean;
+  resultado?: { totalLinhas: number; importadas: number; ignoradas: number };
+  erro?: string;
+};
+
+export type DwSyncStatus = {
+  emExecucao: boolean;
+  execucaoAtual: { origem: 'AGENDADA' | 'MANUAL'; iniciadaEm: string } | null;
+  ultimaExecucao: DwSyncExecucao | null;
+  ultimaSincronizacaoComSucesso: DwSyncExecucao | null;
+  intervaloMinutos: number;
+  proximaExecucaoEm: string | null;
+};
+
 export type NotaFiscalListFilters = {
   status?: string;
   obraId?: number | string | Array<number | string>;
@@ -97,9 +115,14 @@ export class NotaFiscalService {
   }
 
   static async sincronizarDW(): Promise<any> {
-    // A leitura da view no DW pode levar alguns minutos.
-    const response = await api.post('/notas-fiscais/sincronizar-dw', null, { timeout: 10 * 60 * 1000 });
+    // Apenas dispara: a sincronizacao roda em segundo plano no backend.
+    const response = await api.post('/notas-fiscais/sincronizar-dw');
     return response.data;
+  }
+
+  static async statusSincronizacaoDW(): Promise<DwSyncStatus> {
+    const response = await api.get('/notas-fiscais/sincronizar-dw/status');
+    return response.data.data;
   }
 
   static async importarExcel(file: File): Promise<any> {

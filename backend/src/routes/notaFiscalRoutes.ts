@@ -28,6 +28,7 @@ router.post('/importar-excel', authorize('ADMIN', 'ANALYST'), upload.single('fil
 router.post('/sincronizar-dw', authorize('ADMIN', 'ANALYST'), (req, res) =>
 	notaFiscalController.sincronizarDW(req, res),
 );
+router.get('/sincronizar-dw/status', (req, res) => notaFiscalController.statusSincronizacaoDW(req, res));
 
 // CRUD
 router.post('/', authorize('ADMIN', 'ANALYST'), (req, res) => notaFiscalController.create(req, res));

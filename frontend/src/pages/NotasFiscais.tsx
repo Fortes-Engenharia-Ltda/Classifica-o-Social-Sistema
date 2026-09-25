@@ -324,7 +324,6 @@ export const NotasFiscais: React.FC = () => {
     startWidth: number;
     minWidth: number;
   } | null>(null);
-  const [sincronizandoDW, setSincronizandoDW] = useState(false);
 
   const [formData, setFormData] = useState({
     numeroNF: '',
@@ -343,6 +342,37 @@ export const NotasFiscais: React.FC = () => {
       return response.data;
     },
   });
+
+  const { data: dwStatus, refetch: refetchDwStatus } = useQuery({
+    queryKey: ['dw-sync-status'],
+    queryFn: () => NotaFiscalService.statusSincronizacaoDW(),
+    refetchInterval: (query) => (query.state.data?.emExecucao ? 5000 : 60000),
+  });
+  const sincronizandoDW = Boolean(dwStatus?.emExecucao);
+  const sincronizacaoManualRef = useRef(false);
+  const estavaSincronizandoRef = useRef(false);
+
+  useEffect(() => {
+    if (!dwStatus) return;
+
+    const terminou = estavaSincronizandoRef.current && !dwStatus.emExecucao;
+    estavaSincronizandoRef.current = dwStatus.emExecucao;
+    if (!terminou) return;
+
+    refetch();
+
+    if (sincronizacaoManualRef.current) {
+      sincronizacaoManualRef.current = false;
+      const ultima = dwStatus.ultimaExecucao;
+      if (ultima?.sucesso && ultima.resultado) {
+        alert(
+          `Sincronização concluída. Total no DW: ${ultima.resultado.totalLinhas}, novas: ${ultima.resultado.importadas}, já existentes: ${ultima.resultado.ignoradas}`,
+        );
+      } else if (ultima && !ultima.sucesso) {
+        alert(`Erro ao sincronizar com o DW: ${ultima.erro || 'Erro desconhecido'}`);
+      }
+    }
+  }, [dwStatus, refetch]);
 
   const { data: obrasAtivasData } = useQuery({
     queryKey: ['obras-ativas-para-nf'],
@@ -1093,25 +1123,36 @@ export const NotasFiscais: React.FC = () => {
   };
 
   const handleSincronizarDW = async () => {
-    setSincronizandoDW(true);
+    const confirmou = window.confirm(
+      'A sincronização com o DW pode demorar alguns minutos. Ela roda em segundo plano e você pode continuar usando o sistema.\n\nDeseja prosseguir?',
+    );
+    if (!confirmou) return;
+
     try {
-      const response = await NotaFiscalService.sincronizarDW();
-      const result = response?.data || response;
-      alert(
-        `Sincronização concluída. Total no DW: ${result.totalLinhas}, novas: ${result.importadas}, já existentes: ${result.ignoradas}`,
-      );
-      refetch();
+      sincronizacaoManualRef.current = true;
+      await NotaFiscalService.sincronizarDW();
+      await refetchDwStatus();
     } catch (error: any) {
+      sincronizacaoManualRef.current = false;
       const message =
         error?.response?.data?.message ||
         error?.response?.data?.erro ||
         error?.message ||
         'Erro desconhecido';
-      alert(`Erro ao sincronizar com o DW: ${message}`);
-    } finally {
-      setSincronizandoDW(false);
+      alert(`Erro ao iniciar a sincronização com o DW: ${message}`);
     }
   };
+
+  const formatarDataHora = (valor?: string | null) =>
+    valor
+      ? new Date(valor).toLocaleString('pt-BR', {
+          day: '2-digit',
+          month: '2-digit',
+          year: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit',
+        })
+      : null;
 
   const applyCustomPageSize = () => {
     const parsed = Number(customPageSize);
@@ -1650,7 +1691,22 @@ export const NotasFiscais: React.FC = () => {
           </div>
 
           <div className="mb-6 mt-3 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-            <h1 className="text-2xl font-bold text-gray-900 sm:text-3xl lg:text-4xl dark:text-white">Notas Fiscais</h1>
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900 sm:text-3xl lg:text-4xl dark:text-white">Notas Fiscais</h1>
+              <p className="mt-1 text-xs text-slate-500 sm:text-sm dark:text-slate-400">
+                {sincronizandoDW
+                  ? `Sincronizando com o DW desde ${formatarDataHora(dwStatus?.execucaoAtual?.iniciadaEm)}...`
+                  : dwStatus?.ultimaSincronizacaoComSucesso
+                    ? `Última atualização: ${formatarDataHora(dwStatus.ultimaSincronizacaoComSucesso.finalizadaEm)}`
+                    : 'Ainda não sincronizado com o DW'}
+                {!sincronizandoDW && dwStatus?.ultimaExecucao && !dwStatus.ultimaExecucao.sucesso ? (
+                  <span className="ml-2 text-red-600 dark:text-red-400" title={dwStatus.ultimaExecucao.erro}>
+                    (falha na tentativa de {formatarDataHora(dwStatus.ultimaExecucao.finalizadaEm)})
+                  </span>
+                ) : null}
+                {dwStatus ? ` · atualiza automaticamente a cada ${dwStatus.intervaloMinutos} min` : null}
+              </p>
+            </div>
             <div className="nf-toolbar-actions flex w-full flex-wrap items-center gap-2 lg:w-auto">
               <button
                 onClick={handleSincronizarDW}

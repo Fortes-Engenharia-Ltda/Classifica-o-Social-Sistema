@@ -3,7 +3,7 @@ import { AuthenticatedRequest } from '../middlewares/auth';
 import { NotaFiscalService } from '../services/NotaFiscalService';
 import { ListarNotasFiscaisFiltersDTO } from '../dtos/NotaFiscalDTO';
 import { successResponse, errorResponse } from '../utils/response';
-import logger from '../config/logger';
+import { dwSyncService } from '../services/DwSyncService';
 
 const notaFiscalService = new NotaFiscalService();
 
@@ -179,15 +179,19 @@ export class NotaFiscalController {
   }
 
   async sincronizarDW(req: AuthenticatedRequest, res: Response): Promise<void> {
-    try {
-      logger.info('Sincronizacao DW iniciada');
-      const result = await notaFiscalService.sincronizarDW();
-      logger.info('Sincronizacao DW concluida', { result });
-      res.status(200).json(successResponse('Notas fiscais sincronizadas com o DW', result));
-    } catch (error: any) {
-      logger.error('Erro na sincronizacao DW', { error: error.message, stack: error.stack });
-      res.status(500).json(errorResponse(error.message || 'Erro ao sincronizar notas fiscais com o DW'));
-    }
+    const iniciada = dwSyncService.disparar('MANUAL');
+    res
+      .status(202)
+      .json(
+        successResponse(
+          iniciada ? 'Sincronizacao com o DW iniciada' : 'Ja existe uma sincronizacao em andamento',
+          dwSyncService.getStatus(),
+        ),
+      );
+  }
+
+  async statusSincronizacaoDW(_req: AuthenticatedRequest, res: Response): Promise<void> {
+    res.status(200).json(successResponse('Status da sincronizacao com o DW', dwSyncService.getStatus()));
   }
 
   async baixarTemplateExcel(req: AuthenticatedRequest, res: Response): Promise<void> {
