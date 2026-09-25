@@ -3,6 +3,7 @@ import { AuthenticatedRequest } from '../middlewares/auth';
 import { NotaFiscalService } from '../services/NotaFiscalService';
 import { ListarNotasFiscaisFiltersDTO } from '../dtos/NotaFiscalDTO';
 import { successResponse, errorResponse } from '../utils/response';
+import logger from '../config/logger';
 
 const notaFiscalService = new NotaFiscalService();
 
@@ -179,9 +180,12 @@ export class NotaFiscalController {
 
   async sincronizarDW(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
+      logger.info('Sincronizacao DW iniciada');
       const result = await notaFiscalService.sincronizarDW();
+      logger.info('Sincronizacao DW concluida', { result });
       res.status(200).json(successResponse('Notas fiscais sincronizadas com o DW', result));
     } catch (error: any) {
+      logger.error('Erro na sincronizacao DW', { error: error.message, stack: error.stack });
       res.status(500).json(errorResponse(error.message || 'Erro ao sincronizar notas fiscais com o DW'));
     }
   }

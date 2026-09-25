@@ -15,7 +15,10 @@ const logger = winston.createLogger({
   ],
 });
 
-if (config.server.env !== 'production') {
+if (config.server.env === 'production') {
+  // Railway so exibe o que sai no stdout/stderr
+  logger.add(new winston.transports.Console());
+} else {
   logger.add(
     new winston.transports.Console({
       format: winston.format.combine(

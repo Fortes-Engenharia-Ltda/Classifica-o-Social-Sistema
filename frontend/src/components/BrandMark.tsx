@@ -9,8 +9,8 @@ interface BrandMarkProps {
 
 const baseUrl = import.meta.env.BASE_URL;
 const brandName = import.meta.env.VITE_COMPANY_NAME || 'Classificação Social';
-const brandLogoLight = baseUrl + (import.meta.env.VITE_COMPANY_LOGO_LIGHT?.trim() || '');
-const brandLogoDark = baseUrl + (import.meta.env.VITE_COMPANY_LOGO_DARK?.trim() || '');
+const brandLogoLight = baseUrl + (import.meta.env.VITE_COMPANY_LOGO_LIGHT?.trim() || 'branding/logo-fortes-colorida.png');
+const brandLogoDark = baseUrl + (import.meta.env.VITE_COMPANY_LOGO_DARK?.trim() || 'branding/logo-fortes-branca.png');
 const brandLogoAlt = import.meta.env.VITE_COMPANY_LOGO_ALT || brandName;
 
 const getInitials = (value: string): string => {
@@ -66,8 +66,8 @@ export const BrandMark: React.FC<BrandMarkProps> = ({
 export const DevelopedBy: React.FC<{ className?: string; inline?: boolean }> = ({ className = '', inline = false }) => {
   const baseUrl = import.meta.env.BASE_URL;
   const label = import.meta.env.VITE_DEV_BY_LABEL || 'Desenvolvido por';
-  const logoLight = baseUrl + (import.meta.env.VITE_DEV_LOGO_LIGHT?.trim() || '');
-  const logoDark = baseUrl + (import.meta.env.VITE_DEV_LOGO_DARK?.trim() || '');
+  const logoLight = baseUrl + (import.meta.env.VITE_DEV_LOGO_LIGHT?.trim() || 'branding/dev-colorido-completo.png');
+  const logoDark = baseUrl + (import.meta.env.VITE_DEV_LOGO_DARK?.trim() || 'branding/dev-branco-completo.png');
   const alt = import.meta.env.VITE_DEV_LOGO_ALT || 'Desenvolvido por';
 
   if (!logoLight && !logoDark) {

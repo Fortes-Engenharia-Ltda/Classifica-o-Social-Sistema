@@ -13,7 +13,6 @@ import {
   X,
 } from 'lucide-react';
 import { useUIStore } from '@/store/uiStore';
-import { DevelopedBy } from './BrandMark';
 import { DEFAULT_MODULE_VISIBILITY, SystemModuleKey } from '@/config/moduleVisibility';
 import { SystemConfigService } from '@/services/SystemConfigService';
 
@@ -113,12 +112,6 @@ export const Sidebar: React.FC = () => {
               </Link>
             ))}
           </nav>
-
-          {sidebarOpen ? (
-            <div className={`mt-auto border-t p-4 ${darkMode ? 'border-white/10' : 'border-slate-200/80'}`}>
-              <DevelopedBy inline className="flex-col" />
-            </div>
-          ) : null}
         </div>
       </aside>
 
